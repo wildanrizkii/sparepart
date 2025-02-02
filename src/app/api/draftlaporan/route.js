@@ -6,7 +6,7 @@ export async function GET() {
     const query = `
       SELECT * FROM draft;
     `;
-    const value = [];
+    const value = ["test"];
     let data = await handlerQuery(query, value);
 
     return NextResponse.json(data);

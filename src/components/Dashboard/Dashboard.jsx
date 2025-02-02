@@ -271,7 +271,7 @@ const Dashboard = () => {
   const fetchPartInduk = async () => {
     try {
       const response = await axios.get("/api/partinduk");
-      const partindukData = response.data.rows.map((row, index) => ({
+      const partindukData = response?.data?.rows?.map((row, index) => ({
         key: row.id_pi,
         nomor_pi: row.no_part,
         nomor_pi_update: row.no_part_update,
@@ -316,6 +316,7 @@ const Dashboard = () => {
     try {
       const response = await axios.get("/api/draftlaporan");
       setCartItems(response.data.rows);
+      console.log(response.data.rows);
 
       const selectedKeys = response.data.rows
         .map((item) => {
@@ -383,7 +384,7 @@ const Dashboard = () => {
       for (const key of unselectedKeys) {
         const rowToDelete = initialData.find((row) => row.key === key);
         if (rowToDelete) {
-          const draftItem = cartItems.find(
+          const draftItem = cartItems?.find(
             (item) => item.no_part === rowToDelete.nomor_pi
           );
           if (draftItem) {
@@ -458,7 +459,9 @@ const Dashboard = () => {
       });
 
       if (response.status === 200) {
-        const removedItem = cartItems.find((item) => item.id_draft === itemKey);
+        const removedItem = cartItems?.find(
+          (item) => item.id_draft === itemKey
+        );
         const matchingRow = initialData.find(
           (row) => row.nomor_pi === removedItem.no_part
         );
@@ -471,7 +474,7 @@ const Dashboard = () => {
 
         await fetchDraftLaporan();
 
-        const totalPages = Math.ceil((cartItems.length - 1) / cartPageSize);
+        const totalPages = Math.ceil((cartItems?.length - 1) / cartPageSize);
         if (currentCartPage > totalPages && totalPages > 0) {
           setCurrentCartPage(totalPages);
         }
@@ -499,7 +502,7 @@ const Dashboard = () => {
 
   const getPaginatedCartItems = () => {
     const startIndex = (currentCartPage - 1) * cartPageSize;
-    return cartItems.slice(startIndex, startIndex + cartPageSize);
+    return cartItems?.slice(startIndex, startIndex + cartPageSize);
   };
 
   const onCartPageChange = (page) => {
@@ -526,7 +529,7 @@ const Dashboard = () => {
           <div className="text-2xl font-medium">
             <p>Daftar Part Induk</p>
           </div>
-          <Badge count={cartItems.length}>
+          <Badge count={cartItems?.length}>
             <FileDoneOutlined
               style={{ fontSize: "24px" }}
               onClick={toggleDraftVisibility}
@@ -590,9 +593,9 @@ const Dashboard = () => {
                         alignItems: "center",
                       }}
                     >
-                      <Text>Draft Laporan ({cartItems.length})</Text>
+                      <Text>Draft Laporan ({cartItems?.length})</Text>
 
-                      {cartItems.length > 0 && (
+                      {cartItems?.length > 0 && (
                         <div>
                           <Button type="text" danger onClick={clearCart}>
                             Clear All
@@ -658,7 +661,7 @@ const Dashboard = () => {
                     loading={loading}
                   />
 
-                  {cartItems.length > 0 && (
+                  {cartItems?.length > 0 && (
                     <Button
                       className="w-full mt-2 bg-blue-500 text-white"
                       onClick={() => setVisible(true)}
@@ -745,7 +748,7 @@ const Dashboard = () => {
                 </Card>
 
                 {/* Pagination Selalu di Bawah */}
-                {cartItems.length > cartPageSize && (
+                {cartItems?.length > cartPageSize && (
                   <div
                     style={{
                       textAlign: "right",
@@ -754,7 +757,7 @@ const Dashboard = () => {
                   >
                     <Pagination
                       current={currentCartPage}
-                      total={cartItems.length}
+                      total={cartItems?.length}
                       pageSize={cartPageSize}
                       onChange={onCartPageChange}
                       size="large"

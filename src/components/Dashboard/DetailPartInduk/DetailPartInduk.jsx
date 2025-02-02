@@ -79,9 +79,12 @@ const DetailPartInduk = ({ nomor }) => {
         id_pi: partId,
       });
 
+      console.log(response2);
+
       setTimeout(() => {
         setLoadingButton(false);
-        if (response2.data.rows[0].jumlah == 1) {
+
+        if (response2?.data?.rows[0].jumlah == 1) {
           setStatusButton(true);
         } else {
           setStatusButton(false);

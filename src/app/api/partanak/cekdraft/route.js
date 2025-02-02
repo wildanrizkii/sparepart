@@ -6,19 +6,21 @@ export async function POST(req) {
   const id_pi = request.id_pi;
 
   try {
-    let query = `
-        SELECT 
-            COUNT(id_pi) as jumlah
-        FROM 
-            draft
-        WHERE 
-            id_pi = $1
-      `;
-    let value = [id_pi];
-    let data = await handlerQuery(query, value);
+    const query = `
+      SELECT 
+        COUNT(id_pi) AS count
+      FROM 
+        draft
+      WHERE 
+        id_pi = $1
+    `;
+    const values = [id_pi];
+    const data = await handlerQuery(query, values);
 
-    return NextResponse.json(data);
+    console.log(data);
+
+    return NextResponse.json({ count: data[0].count });
   } catch (error) {
-    return NextResponse.json({ error: "Error on route" });
+    return NextResponse.json({ error: error.message }); // Tampilkan pesan error spesifik
   }
 }
