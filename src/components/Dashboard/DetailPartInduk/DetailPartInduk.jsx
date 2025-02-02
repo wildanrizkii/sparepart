@@ -54,6 +54,8 @@ const DetailPartInduk = ({ nomor }) => {
         no_part_induk: nomor,
       });
 
+      console.log("RESPON1" + response.data);
+
       const dataLength = response?.data?.rows?.length;
       setPartId(response?.data?.rows[0]?.id_pi);
       setNoPart(response?.data?.rows[0]?.no_part);
@@ -84,14 +86,14 @@ const DetailPartInduk = ({ nomor }) => {
       setTimeout(() => {
         setLoadingButton(false);
 
-        if (response2?.data?.rows[0].jumlah == 1) {
+        if (response2?.rows[0].jumlah == 1) {
           setStatusButton(true);
         } else {
           setStatusButton(false);
         }
       }, 1000);
 
-      const partAnakData = response?.data?.rows?.map((row) => ({
+      const partAnakData = response?.rows?.map((row) => ({
         key: row.id_pa,
         nomor_pa: row.no_part || "-",
         nomor_pa_update: row.no_part_update || "-",

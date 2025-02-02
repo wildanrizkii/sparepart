@@ -10,7 +10,7 @@ export async function POST(req) {
         DELETE FROM 
             draft
 	    WHERE 
-            no_part = $1;
+            no_part = $1
       `;
     let value = [no_part];
     let data = await handlerQuery(query, value);

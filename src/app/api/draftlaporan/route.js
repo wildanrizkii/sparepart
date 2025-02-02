@@ -3,10 +3,8 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const query = `
-      SELECT * FROM draft;
-    `;
-    const value = ["test"];
+    let query = `SELECT * FROM draft`;
+    let value = [];
     let data = await handlerQuery(query, value);
 
     return NextResponse.json(data);

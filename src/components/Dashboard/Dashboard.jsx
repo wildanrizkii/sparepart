@@ -316,7 +316,7 @@ const Dashboard = () => {
     try {
       const response = await axios.get("/api/draftlaporan");
       setCartItems(response.data.rows);
-      console.log(response.data.rows);
+      console.log(response);
 
       const selectedKeys = response.data.rows
         .map((item) => {

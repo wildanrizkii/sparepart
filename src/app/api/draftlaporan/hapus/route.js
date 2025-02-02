@@ -8,13 +8,13 @@ export async function POST(req) {
   try {
     if (id_draft != "clear") {
       let query = `
-        DELETE FROM draft WHERE id_draft = $1;
+        DELETE FROM draft WHERE id_draft = $1
       `;
       let value = [id_draft];
       let data = await handlerQuery(query, value);
     } else {
       let query = `
-        DELETE FROM draft;
+        DELETE FROM draft
       `;
       let value = [];
       let data = await handlerQuery(query, value);
