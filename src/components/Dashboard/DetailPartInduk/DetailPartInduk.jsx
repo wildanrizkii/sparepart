@@ -20,8 +20,8 @@ import {
   FileDoneOutlined,
 } from "@ant-design/icons";
 
-import axios from "axios";
 import { useRouter } from "next/navigation";
+import supabase from "@/app/utils/db";
 
 const { Text } = Typography;
 
@@ -50,16 +50,15 @@ const DetailPartInduk = ({ nomor }) => {
 
   const fetchPartInduk = async () => {
     try {
-      const response = await axios.post("/api/partinduk/cek", {
-        no_part_induk: nomor,
-      });
+      const { data, error } = await supabase
+        .from("part_induk")
+        .select("*")
+        .eq("no_part", nomor);
 
-      console.log("RESPON1" + response.data);
-
-      const dataLength = response?.data?.rows?.length;
-      setPartId(response?.data?.rows[0]?.id_pi);
-      setNoPart(response?.data?.rows[0]?.no_part);
-      setNoPartUpdate(response?.data?.rows[0]?.no_part_update);
+      const dataLength = data.length;
+      setPartId(data[0].id_pi);
+      setNoPart(data[0].no_part);
+      setNoPartUpdate(data[0].no_part_update);
 
       if (dataLength === 0) {
         router.push("/");
@@ -73,27 +72,50 @@ const DetailPartInduk = ({ nomor }) => {
 
   const fetchPartAnak = async () => {
     try {
-      const response = await axios.post("/api/partanak", {
-        id_pi: partId,
-      });
+      const { data: response, error: responseError } = await supabase
+        .from("view_part_gabungan")
+        .select(
+          `
+        id_gabungan,
+        id_pa,
+        id_pi,
+        nama,
+        no_part,
+        no_part_update,
+        no_cmw,
+        nama_dwg,
+        nama_material,
+        nama_lokal,
+        nama_maker,
+        nama_impor
+      `
+        )
+        .eq("id_pi", partId);
 
-      const response2 = await axios.post("/api/partanak/cekdraft", {
-        id_pi: partId,
-      });
+      if (responseError) {
+        console.error("Error fetching data:", error);
+      }
 
-      console.log(response2);
+      const { data: response2, error: errorJumlah } = await supabase
+        .from("draft")
+        .select("id_pi")
+        .eq("id_pi", partId);
+
+      if (errorJumlah) {
+        console.error("Error fetching data:", error);
+      }
 
       setTimeout(() => {
         setLoadingButton(false);
 
-        if (response2?.rows[0].jumlah == 1) {
+        if (response2.length == 1) {
           setStatusButton(true);
         } else {
           setStatusButton(false);
         }
       }, 1000);
 
-      const partAnakData = response?.rows?.map((row) => ({
+      const partAnakData = response.map((row) => ({
         key: row.id_pa,
         nomor_pa: row.no_part || "-",
         nomor_pa_update: row.no_part_update || "-",
@@ -186,19 +208,22 @@ const DetailPartInduk = ({ nomor }) => {
 
   const handleTambah = async (id_pi, value1, value2) => {
     try {
-      const response = await axios.post("/api/draftlaporan/tambah", {
-        id_pi: id_pi,
-        no_part: value1,
-        no_part_update: value2,
-      });
-      if (response.status == 200) {
+      const { data, error } = await supabase.from("draft").insert([
+        {
+          id_pi: id_pi,
+          no_part: value1,
+          no_part_update: value2,
+        },
+      ]);
+
+      if (error) {
+        setStatusButton(false);
+      } else {
         setLoadingButton(true); // Set loading to true
         setTimeout(() => {
           setLoadingButton(false);
           setStatusButton(true);
         }, 800);
-      } else {
-        setStatusButton(false);
       }
     } catch (error) {
       console.error("Error fetching data: ", error);
@@ -207,18 +232,19 @@ const DetailPartInduk = ({ nomor }) => {
 
   const handleHapus = async (value) => {
     try {
-      const response = await axios.post("/api/partanak/hapusdraft", {
-        no_part: value,
-      });
+      const { data, error } = await supabase
+        .from("draft")
+        .delete()
+        .eq("no_part", value);
 
-      if (response.status == 200) {
+      if (error) {
+        setStatusButton(true);
+      } else {
         setLoadingButton(true); // Set loading to true
         setTimeout(() => {
           setLoadingButton(false);
           setStatusButton(false);
         }, 800);
-      } else {
-        setStatusButton(true);
       }
     } catch (error) {
       console.error("Error fetching data: ", error);

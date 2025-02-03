@@ -19,10 +19,10 @@ import {
   FileDoneOutlined,
 } from "@ant-design/icons";
 import "../../app/globals.css";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import Spreadsheet from "react-spreadsheet";
 import ExcelJS from "exceljs";
+import { supabase } from "@/app/utils/db";
 
 const { Text } = Typography;
 
@@ -270,8 +270,8 @@ const Dashboard = () => {
 
   const fetchPartInduk = async () => {
     try {
-      const response = await axios.get("/api/partinduk");
-      const partindukData = response?.data?.rows?.map((row, index) => ({
+      const { data, error } = await supabase.from("part_induk").select("*");
+      const partindukData = data.map((row, index) => ({
         key: row.id_pi,
         nomor_pi: row.no_part,
         nomor_pi_update: row.no_part_update,
@@ -300,8 +300,10 @@ const Dashboard = () => {
 
   const fetchDataDraft = async () => {
     try {
-      const response = await axios.get("/api/draftlaporan/generate");
-      setDataDraft(response.data.rows);
+      const { data, error } = await supabase
+        .from("view_part_details")
+        .select("*");
+      setDataDraft(data);
     } catch (error) {
       console.error("Error fetching data: ", error);
     } finally {
@@ -314,11 +316,10 @@ const Dashboard = () => {
 
   const fetchDraftLaporan = async () => {
     try {
-      const response = await axios.get("/api/draftlaporan");
-      setCartItems(response.data.rows);
-      console.log(response);
+      const { data, error } = await supabase.from("draft").select("*");
+      setCartItems(data);
 
-      const selectedKeys = response.data.rows
+      const selectedKeys = data
         .map((item) => {
           const matchingRow = initialData.find(
             (row) => row.nomor_pi === item.no_part
@@ -343,11 +344,12 @@ const Dashboard = () => {
   const handleRowClick = async (event, record) => {
     let paramsData = "";
     try {
-      const response = await axios.post("/api/partinduk", {
-        key: record.key,
-      });
+      const { data, error } = await supabase
+        .from("part_induk")
+        .select("*")
+        .eq("id_pi", record.key);
 
-      paramsData = response?.data?.rows[0]?.no_part;
+      paramsData = data[0].no_part;
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
@@ -374,11 +376,33 @@ const Dashboard = () => {
       );
 
       for (const row of newlySelectedRows) {
-        await axios.post("/api/draftlaporan/tambah", {
-          id_pi: row.key,
-          no_part: row.nomor_pi,
-          no_part_update: row.nomor_pi_update,
-        });
+        const { data, error } = await supabase
+          .from("draft")
+          .select("*")
+          .eq("no_part", row.nomor_pi);
+
+        if (error) {
+          console.error("Error inserting data:", error);
+        } else {
+          console.log("Insert successful:", data);
+        }
+
+        if (data.length > 0) {
+          console.log("Data sudah ada pada draft!");
+        } else {
+          const { data, error } = await supabase.from("draft").insert([
+            {
+              id_pi: row.key,
+              no_part: row.nomor_pi,
+              no_part_update: row.nomor_pi_update,
+            },
+          ]);
+          if (error) {
+            console.error("Error inserting data:", error);
+          } else {
+            console.log("Insert successful:", data);
+          }
+        }
       }
 
       for (const key of unselectedKeys) {
@@ -388,9 +412,19 @@ const Dashboard = () => {
             (item) => item.no_part === rowToDelete.nomor_pi
           );
           if (draftItem) {
-            await axios.post("/api/draftlaporan/hapus", {
-              id_draft: draftItem.id_draft,
-            });
+            const { data, error } = await supabase
+              .from("draft")
+              .delete()
+              .eq("id_draft", draftItem.id_draft);
+
+            if (error) {
+              console.error("Error deleting data:", error);
+            } else {
+              console.log(
+                `Data with id_draft ${draftItem.id_draft} deleted successfully:`,
+                data
+              );
+            }
           }
         }
       }
@@ -454,11 +488,14 @@ const Dashboard = () => {
 
   const removeFromCart = async (itemKey) => {
     try {
-      const response = await axios.post("/api/draftlaporan/hapus", {
-        id_draft: itemKey,
-      });
+      const { data, error } = await supabase
+        .from("draft")
+        .delete()
+        .eq("id_draft", itemKey);
 
-      if (response.status === 200) {
+      if (error) {
+        console.error("Error deleting data:", error);
+      } else {
         const removedItem = cartItems?.find(
           (item) => item.id_draft === itemKey
         );
@@ -486,11 +523,14 @@ const Dashboard = () => {
 
   const clearCart = async () => {
     try {
-      const response = await axios.post("/api/draftlaporan/hapus", {
-        id_draft: "clear",
-      });
+      const { data, error } = await supabase
+        .from("draft")
+        .delete()
+        .neq("id_draft", 0);
 
-      if (response.status === 200) {
+      if (error) {
+        console.error("Error deleting all data:", error);
+      } else {
         setCartItems([]);
         setSelectedRowKeys([]);
         setCurrentCartPage(1);

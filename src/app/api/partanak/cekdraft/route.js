@@ -8,7 +8,7 @@ export async function POST(req) {
   try {
     const query = `
       SELECT 
-        COUNT(id_pi) AS count
+        COUNT(id_pi)
       FROM 
         draft
       WHERE 
@@ -17,9 +17,9 @@ export async function POST(req) {
     const values = [id_pi];
     const data = await handlerQuery(query, values);
 
-    console.log(data);
+    // console.log(data);
 
-    return NextResponse.json({ count: data[0].count });
+    return NextResponse.json({ count: data });
   } catch (error) {
     return NextResponse.json({ error: error.message }); // Tampilkan pesan error spesifik
   }
