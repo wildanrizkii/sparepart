@@ -105,11 +105,10 @@ const SideNavigation = ({ menu, submenu, konten }) => {
               className="mt-8 mb-8"
             >
               <Image
-                src="/logo-sparepart.png"
-                width={collapsed ? 60 : 128}
-                height={collapsed ? 60 : 128}
+                src="/logo-cmw.png"
+                width={collapsed ? 60 : 210}
+                height={collapsed ? 60 : 60}
                 preview={false}
-                className="rounded-lg"
               />
             </Space>
 
