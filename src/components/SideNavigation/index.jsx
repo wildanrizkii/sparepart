@@ -1,8 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 // import { useSession } from "next-auth/react";
-import axios from "axios";
-
 import { Poppins } from "next/font/google";
 import dayjs from "dayjs";
 
@@ -70,6 +68,7 @@ const SideNavigation = ({ menu, submenu, konten }) => {
   const [fiturAnggaranCount, setFiturAnggaranCount] = useState(false);
   const [fiturTransaksi, setFiturTransaksi] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -84,12 +83,30 @@ const SideNavigation = ({ menu, submenu, konten }) => {
     window.scrollTo(0, 0);
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setCollapsed(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
     <>
       {true ? (
         <Layout style={{ minHeight: "100vh" }} className={poppins.variable}>
           <Sider
             collapsed={collapsed}
+            // collapsible
+            // onCollapse={toggleCollapsed}
+            breakpoint="md"
             style={{
               padding: 0,
               background: colorBgContainer,
@@ -176,15 +193,15 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                 backgroundColor: "transparent",
               }}
             >
-              {/* <Button
+              <Button
                 type="text"
                 icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                onClick={() => setCollapsed(!collapsed)}
+                onClick={toggleCollapsed}
                 style={{
                   width: 64,
                   height: 64,
                 }}
-              /> */}
+              />
 
               <Space
                 direction="horizontal"
