@@ -85,34 +85,54 @@ const Dashboard = () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Report");
 
-    worksheet.addRow([]);
+    // Menambahkan baris baru di awal dengan tulisan "PT. CIPTA MANDIRI WIRASAKTI" (hanya 1 baris)
+    worksheet.insertRow(1, ["PT. CIPTA MANDIRI WIRASAKTI"]);
+    worksheet.insertRow(2, ["SUPPLIER / MAKER LAY OUT"]); // Baris kosong ke-2
 
-    worksheet.columns = [
-      { header: "Field", key: "field", width: 25 },
-      { header: "Value", key: "value", width: 40 },
-    ];
+    // Menggabungkan sel untuk tulisan "PT. CIPTA MANDIRI WIRASAKTI"
+    worksheet.mergeCells("A1:B1"); // Menggabungkan dari kolom A hingga B
+    worksheet.mergeCells("A2:B2"); // Menggabungkan dari kolom A hingga B
+
+    // Menggabungkan kolom H hingga K pada baris 1 dan 2
+    worksheet.mergeCells("H1:K1");
+    worksheet.mergeCells("H2:K2");
+
+    // Mengatur gaya untuk tulisan "PT. CIPTA MANDIRI WIRASAKTI"
+    const headerCell = worksheet.getCell("A1");
+    headerCell.font = { bold: true, size: 14 };
+    headerCell.alignment = { horizontal: "center", vertical: "middle" };
+
+    const headerCell2 = worksheet.getCell("A2");
+    headerCell2.font = { bold: true, size: 14 };
+    headerCell2.alignment = { horizontal: "center", vertical: "middle" };
+
+    // Menambahkan tulisan "SUPPLIER / MAKER LAY OUT" ke sel yang sudah digabungkan
+    const supplierCell1 = worksheet.getCell("H1");
+    supplierCell1.value = "SUPPLIER / MAKER LAY OUT";
+    supplierCell1.font = { bold: true, size: 18 };
+    supplierCell1.alignment = { horizontal: "center", vertical: "middle" };
 
     spreadsheetData.forEach((row, rowIndex) => {
-      worksheet.getCell(`A${rowIndex + 1}`).value = row[0].value;
-      worksheet.getCell(`B${rowIndex + 1}`).value = row[1].value;
+      worksheet.getCell(`A${rowIndex + 4}`).value = row[0].value; // Baris dimulai dari 6 karena ada 4 baris tambahan di atas
+      worksheet.getCell(`B${rowIndex + 4}`).value = row[1].value;
 
       // Styling
-      worksheet.getCell(`A${rowIndex + 1}`).font = { bold: true };
-      worksheet.getCell(`A${rowIndex + 1}`).alignment = {
+      worksheet.getCell(`A${rowIndex + 4}`).font = { bold: true };
+      worksheet.getCell(`A${rowIndex + 4}`).alignment = {
         horizontal: "left",
         vertical: "middle",
       };
-      worksheet.getCell(`B${rowIndex + 1}`).alignment = {
+      worksheet.getCell(`B${rowIndex + 4}`).alignment = {
         horizontal: "left",
         vertical: "middle",
       };
-      worksheet.getCell(`A${rowIndex + 1}`).border = {
+      worksheet.getCell(`A${rowIndex + 4}`).border = {
         top: { style: "thin", color: { argb: "000000" } },
         left: { style: "thin", color: { argb: "000000" } },
         bottom: { style: "thin", color: { argb: "000000" } },
         right: { style: "thin", color: { argb: "000000" } },
       };
-      worksheet.getCell(`B${rowIndex + 1}`).border = {
+      worksheet.getCell(`B${rowIndex + 4}`).border = {
         top: { style: "thin", color: { argb: "000000" } },
         left: { style: "thin", color: { argb: "000000" } },
         bottom: { style: "thin", color: { argb: "000000" } },
@@ -121,12 +141,12 @@ const Dashboard = () => {
 
       // Highlight header
       if (rowIndex === 0) {
-        worksheet.getCell(`A${rowIndex + 1}`).fill = {
+        worksheet.getCell(`A${rowIndex + 4}`).fill = {
           type: "pattern",
           pattern: "solid",
           fgColor: { argb: "ffffff" },
         };
-        worksheet.getCell(`B${rowIndex + 1}`).fill = {
+        worksheet.getCell(`B${rowIndex + 4}`).fill = {
           type: "pattern",
           pattern: "solid",
           fgColor: { argb: "ffffff" },
@@ -222,6 +242,7 @@ const Dashboard = () => {
     // Style and formatting for draft section
     const lastRowIndex = worksheet.rowCount;
     for (let i = spreadsheetData.length + 3; i <= lastRowIndex; i++) {
+      // Baris dimulai dari 3 karena ada 4 baris tambahan di atas
       const row = worksheet.getRow(i);
       row.eachCell((cell) => {
         cell.border = {
@@ -732,6 +753,7 @@ const Dashboard = () => {
                           value={partNo}
                           onChange={(e) => setPartNo(e.target.value)}
                           className="w-full rounded-md h-10"
+                          required
                         />
                       </div>
                       <div>
