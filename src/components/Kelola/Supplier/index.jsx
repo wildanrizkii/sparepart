@@ -41,7 +41,7 @@ import {
 } from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";
 
-const PartInduk = () => {
+const Supplier = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
@@ -80,25 +80,20 @@ const PartInduk = () => {
       align: "center",
     },
     {
-      title: "No Part Induk",
-      dataIndex: "nomor_pi",
-    },
-    {
-      title: "No Part Induk Update",
-      dataIndex: "nomor_pi_update",
+      title: "Nama Supplier",
+      dataIndex: "nama",
     },
   ];
 
-  const fetchPartInduk = async () => {
+  const fetchSupplier = async () => {
     try {
-      const { data, error } = await supabase.from("part_induk").select("*");
-      const partindukData = data.map((row, index) => ({
-        key: row.id_pi,
+      const { data, error } = await supabase.from("dwg_supplier").select("*");
+      const supplierData = data.map((row, index) => ({
+        key: row.id_dwg,
         no: index + 1 + ".",
-        nomor_pi: row.no_part,
-        nomor_pi_update: row.no_part_update,
+        nama: row.nama,
       }));
-      setInitialData(partindukData);
+      setInitialData(supplierData);
     } catch (error) {
       console.error("Error fetching data: ", error);
     } finally {
@@ -115,14 +110,10 @@ const PartInduk = () => {
     }
 
     const filtered = initialData.filter((item) => {
-      const nomorPi = (item.nomor_pi || "-").toString();
-      const nomorPiUpdate = (item.nomor_pi_update || "-").toString();
+      const nama = (item.nama || "-").toString();
       const searchValue = value.toString();
 
-      return (
-        nomorPi.toLowerCase().includes(searchValue.toLowerCase()) ||
-        nomorPiUpdate.toLowerCase().includes(searchValue.toLowerCase())
-      );
+      return nama.toLowerCase().includes(searchValue.toLowerCase());
     });
 
     setFilteredData(filtered);
@@ -130,7 +121,7 @@ const PartInduk = () => {
 
   useEffect(() => {
     setFilteredData(initialData);
-    fetchPartInduk();
+    fetchSupplier();
   }, []);
 
   useEffect(() => {
@@ -140,20 +131,19 @@ const PartInduk = () => {
   const handleSubmit = async (values) => {
     console.log(values);
     try {
-      const { data, error } = await supabase.from("part_induk").insert([
+      const { data, error } = await supabase.from("dwg_supplier").insert([
         {
-          id_pi: await supabase
-            .from("part_induk")
-            .select("id_pi", { count: "exact", head: true })
+          id_dwg: await supabase
+            .from("dwg_supplier")
+            .select("id_dwg", { count: "exact", head: true })
             .then((r) => r.count + 1),
-          no_part: values.nopartinduk,
-          no_part_update: values.nopartindukupdate,
+          nama: values.namasupplier,
         },
       ]);
       if (error) {
         console.error("Error inserting data:", error);
       } else {
-        console.log("Insert successful:", data);
+        fetchSupplier();
       }
       onClose();
       form.resetFields();
@@ -161,14 +151,14 @@ const PartInduk = () => {
       if (error) {
         notification.error({
           message: "Error",
-          description: "Terjadi kesalahan saat menambah part induk",
+          description: "Terjadi kesalahan saat menambah supplier",
           placement: "top",
           duration: 3,
         });
       } else {
         notification.success({
           message: "Berhasil",
-          description: "Part induk baru berhasil ditambahkan",
+          description: "Supplier baru berhasil ditambahkan",
           placement: "top",
           duration: 5,
         });
@@ -177,7 +167,7 @@ const PartInduk = () => {
       console.error("Error on submit data!");
       notification.error({
         message: "Error",
-        description: "Terjadi kesalahan saat menambah part induk",
+        description: "Terjadi kesalahan saat menambah supplier",
         placement: "top",
         duration: 3,
       });
@@ -190,7 +180,6 @@ const PartInduk = () => {
     <div className="max-w-screen-xl">
       <div className="grid gap-4">
         <Drawer
-          // title="Buat Anggaran"
           width={720}
           onClose={onClose}
           open={open}
@@ -199,7 +188,7 @@ const PartInduk = () => {
               paddingBottom: 80,
             },
           }}
-          extra={<p className="text-lg font-bold">Tambah Part Induk</p>}
+          extra={<p className="text-lg font-bold">Tambah Supplier</p>}
           footer={
             <div
               style={{
@@ -231,8 +220,8 @@ const PartInduk = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  name="nopartinduk"
-                  label="Nomor Part Induk"
+                  name="namasupplier"
+                  label="Nama Supplier"
                   rules={[
                     {
                       required: true,
@@ -242,7 +231,7 @@ const PartInduk = () => {
                 >
                   <Input
                     type="text"
-                    id="nopartinduk"
+                    id="namasupplier"
                     placeholder="Masukkan nomor part induk"
                     style={{
                       minHeight: 39,
@@ -253,49 +242,24 @@ const PartInduk = () => {
                 </Form.Item>
               </Col>
             </Row>
-            <Row gutter={16}>
-              <Col span={24}>
-                <Form.Item
-                  name="nopartindukupdate"
-                  label="Nomor Part Induk Update"
-                  rules={[
-                    {
-                      required: false,
-                      message: "Isi field ini terlebih dahulu!",
-                    },
-                  ]}
-                >
-                  <Input
-                    type="text"
-                    id="nopartindukupdate"
-                    placeholder="Masukkan nomor part induk update"
-                    style={{
-                      minHeight: 39,
-                    }}
-                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
-                    // required
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
           </Form>
         </Drawer>
         <div className="grid gap-4">
-          <h1 className="text-2xl font-medium col-span-1">Kelola Part Induk</h1>
+          <h1 className="text-2xl font-medium col-span-1">Kelola Supplier</h1>
           <div className="grid gap-4 justify-end">
             <button
               onClick={showDrawer}
               type="submit"
               className="max-w-44 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
             >
-              Tambah Part Induk
+              Tambah Supplier
             </button>
           </div>
         </div>
 
         <div>
           <Input
-            placeholder="Cari Nomor Part Induk"
+            placeholder="Cari Nama Supplier"
             size="large"
             value={searchText}
             onChange={(e) => handleSearch(e.target.value)}
@@ -325,4 +289,4 @@ const PartInduk = () => {
   );
 };
 
-export default PartInduk;
+export default Supplier;

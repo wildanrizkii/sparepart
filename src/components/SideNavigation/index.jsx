@@ -34,6 +34,9 @@ import {
   BellOutlined,
   BellFilled,
   NotificationFilled,
+  AppstoreOutlined,
+  AppstoreAddOutlined,
+  LayoutOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -120,7 +123,7 @@ const SideNavigation = ({ menu, submenu, konten }) => {
               items={[
                 {
                   key: "1",
-                  icon: <ProductOutlined style={{ fontSize: "22px" }} />,
+                  icon: <LayoutOutlined style={{ fontSize: "22px" }} />,
                   label: "Daftar Part Induk",
                   onClick: () => router.push("/"),
                 },
@@ -131,14 +134,14 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                   children: [
                     {
                       key: "2-1",
-                      icon: <UserOutlined style={{ fontSize: "20px" }} />,
+                      icon: <AppstoreOutlined style={{ fontSize: "20px" }} />,
                       label: "Part Induk",
                       onClick: () => router.push("/kelola/partinduk"),
                     },
                     {
                       key: "2-2",
                       icon: (
-                        <OrderedListOutlined style={{ fontSize: "20px" }} />
+                        <AppstoreAddOutlined style={{ fontSize: "20px" }} />
                       ),
                       label: "Part Anak",
                       onClick: () => router.push("/kelola/partanak"),
