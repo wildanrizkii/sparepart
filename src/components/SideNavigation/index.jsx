@@ -126,7 +126,7 @@ const SideNavigation = ({ menu, submenu, konten }) => {
             >
               <Image
                 src="/logo-cmw.png"
-                width={collapsed ? 60 : 210}
+                width={collapsed ? 60 : 180}
                 height={collapsed ? 60 : 60}
                 preview={false}
               />

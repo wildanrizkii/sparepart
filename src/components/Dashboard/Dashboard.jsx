@@ -19,7 +19,6 @@ import {
   FileDoneOutlined,
 } from "@ant-design/icons";
 import "../../app/globals.css";
-3;
 import { useRouter } from "next/navigation";
 import Spreadsheet from "react-spreadsheet";
 import ExcelJS from "exceljs";
@@ -585,8 +584,9 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="max-w-screen-xl">
-      <div className="grid gap-4">
+    <div className="max-w-screen-xl mx-auto p-4">
+      <div className="space-y-4">
+        {/* Header Section */}
         <Flex justify="space-between" align="center">
           <div className="text-2xl font-medium">
             <p>Daftar Part Induk</p>
@@ -595,6 +595,7 @@ const Dashboard = () => {
             <FileDoneOutlined
               style={{ fontSize: "24px" }}
               onClick={toggleDraftVisibility}
+              className="cursor-pointer"
             />
           </Badge>
         </Flex>
@@ -606,12 +607,186 @@ const Dashboard = () => {
             value={searchText}
             onChange={(e) => handleSearch(e.target.value)}
             suffix={suffix}
+            className="w-full"
           />
         </div>
 
-        <Flex gap="large">
-          {/* Table Section */}
-          <div style={{ flex: 2 }}>
+        {/* Flex Container untuk Table dan Draft Section */}
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Draft Section */}
+          {isDraftVisible && (
+            <div className="w-full lg:w-1/3">
+              <Card
+                title={
+                  <div className="flex justify-between items-center">
+                    <Text>Draft Laporan ({cartItems?.length})</Text>
+                    {cartItems?.length > 0 && (
+                      <Button type="text" danger onClick={clearCart}>
+                        Clear All
+                      </Button>
+                    )}
+                  </div>
+                }
+                className="h-[607px] shadow-sm"
+              >
+                <List
+                  dataSource={getPaginatedCartItems()}
+                  renderItem={(item) => (
+                    <List.Item
+                      actions={[
+                        <Button
+                          type="text"
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={() => removeFromCart(item.id_draft)}
+                        />,
+                      ]}
+                    >
+                      <List.Item.Meta
+                        title={
+                          item.no_part ? (
+                            <div className="grid">
+                              <div>No Part</div>
+                              <div className="font-bold text-nowrap">
+                                {item.no_part}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="grid">
+                              <div>No Part Update</div>
+                              <div className="font-bold">-</div>
+                            </div>
+                          )
+                        }
+                        description={
+                          item.no_part_update ? (
+                            <div className="grid">
+                              <div>No Part Update</div>
+                              <div className="font-bold text-nowrap">
+                                {item.no_part_update}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="grid">
+                              <div>No Part Update</div>
+                              <div className="font-bold">-</div>
+                            </div>
+                          )
+                        }
+                      />
+                    </List.Item>
+                  )}
+                  locale={{
+                    emptyText: "Pilih part yang akan dijadikan laporan",
+                  }}
+                  loading={loading}
+                />
+
+                <Modal
+                  title={
+                    <div className="text-center text-xl font-semibold text-gray-700">
+                      Generate Report
+                    </div>
+                  }
+                  open={visible}
+                  closeIcon={true}
+                  onCancel={handleCancel}
+                  footer={null}
+                  centered
+                >
+                  <div className="space-y-4 p-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Part No.
+                      </label>
+                      <Input
+                        placeholder="Enter part number"
+                        value={partNo}
+                        onChange={(e) => setPartNo(e.target.value)}
+                        className="w-full rounded-md h-10"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Part Name
+                      </label>
+                      <Input
+                        placeholder="Enter part name"
+                        value={partName}
+                        onChange={(e) => setPartName(e.target.value)}
+                        className="w-full rounded-md h-10"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Customer Name
+                      </label>
+                      <Input
+                        placeholder="Enter customer name"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className="w-full rounded-md h-10"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Project
+                      </label>
+                      <Input
+                        placeholder="Enter project name"
+                        value={project}
+                        onChange={(e) => setProject(e.target.value)}
+                        className="w-full rounded-md h-10"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Revisi / Date
+                      </label>
+                      <Input
+                        placeholder="Enter date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        className="w-full rounded-md h-10"
+                      />
+                    </div>
+                    <Button
+                      className="w-full h-12 mt-4 bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+                      onClick={handleLaporan}
+                    >
+                      Download to Excel
+                    </Button>
+                  </div>
+                </Modal>
+              </Card>
+
+              {cartItems?.length > cartPageSize && (
+                <div className="mt-4 flex justify-end">
+                  <Pagination
+                    current={currentCartPage}
+                    total={cartItems?.length}
+                    pageSize={cartPageSize}
+                    onChange={onCartPageChange}
+                    size="large"
+                  />
+                </div>
+              )}
+
+              {cartItems?.length > 0 && (
+                <Button
+                  className="w-full mt-2 bg-blue-500 text-white hover:bg-blue-600"
+                  onClick={() => setVisible(true)}
+                >
+                  Generate excel
+                </Button>
+              )}
+
+              {/* Pagination */}
+            </div>
+          )}
+
+          <div className={`w-full ${isDraftVisible ? "lg:w-2/3" : ""}`}>
             <Flex gap="middle" vertical>
               <Table
                 rowSelection={rowSelection}
@@ -631,206 +806,7 @@ const Dashboard = () => {
               />
             </Flex>
           </div>
-
-          {/* Cart Section with Pagination */}
-          {isDraftVisible && (
-            <div className="grid">
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  minWidth: "360px",
-                  maxHeight: "607px",
-                  minHeight: "607px",
-                  gap: "16px",
-                }}
-                className="rounded-md shadow-sm"
-              >
-                <Card
-                  title={
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Text>Draft Laporan ({cartItems?.length})</Text>
-
-                      {cartItems?.length > 0 && (
-                        <div>
-                          <Button type="text" danger onClick={clearCart}>
-                            Clear All
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  }
-                  style={{
-                    flex: 1,
-                    maxHeight: "607px",
-                    minHeight: "607px",
-                  }}
-                >
-                  <List
-                    dataSource={getPaginatedCartItems()}
-                    renderItem={(item) => (
-                      <List.Item
-                        actions={[
-                          <Button
-                            type="text"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => removeFromCart(item.id_draft)}
-                          />,
-                        ]}
-                      >
-                        <List.Item.Meta
-                          title={
-                            item.no_part ? (
-                              <div className="grid">
-                                <div>No Part</div>
-                                <div className="font-bold">{item.no_part}</div>
-                              </div>
-                            ) : (
-                              <div className="grid">
-                                <div>No Part Update</div>
-                                <div className="font-bold">-</div>
-                              </div>
-                            )
-                          }
-                          description={
-                            item.no_part_update ? (
-                              <div className="grid">
-                                <div>No Part Update</div>
-                                <div className="font-bold">
-                                  {item.no_part_update}
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="grid">
-                                <div>No Part Update</div>
-                                <div className="font-bold">-</div>
-                              </div>
-                            )
-                          }
-                        />
-                      </List.Item>
-                    )}
-                    locale={{
-                      emptyText: "Pilih part yang akan dijadikan laporan",
-                    }}
-                    loading={loading}
-                  />
-
-                  {cartItems?.length > 0 && (
-                    <Button
-                      className="w-full mt-2 bg-blue-500 text-white"
-                      onClick={() => setVisible(true)}
-                    >
-                      Generate excel
-                    </Button>
-                  )}
-                  <Modal
-                    title={
-                      <div className="text-center text-xl font-semibold text-gray-700">
-                        Generate Report
-                      </div>
-                    }
-                    open={visible}
-                    closeIcon={true}
-                    onCancel={handleCancel}
-                    footer={null}
-                    centered
-                  >
-                    <div className="space-y-4 p-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Part No.
-                        </label>
-                        <Input
-                          placeholder="Enter part number"
-                          value={partNo}
-                          onChange={(e) => setPartNo(e.target.value)}
-                          className="w-full rounded-md h-10"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Part Name
-                        </label>
-                        <Input
-                          placeholder="Enter part name"
-                          value={partName}
-                          onChange={(e) => setPartName(e.target.value)}
-                          className="w-full rounded-md h-10"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Customer Name
-                        </label>
-                        <Input
-                          placeholder="Enter customer name"
-                          value={customerName}
-                          onChange={(e) => setCustomerName(e.target.value)}
-                          className="w-full rounded-md h-10"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Project
-                        </label>
-                        <Input
-                          placeholder="Enter project name"
-                          value={project}
-                          onChange={(e) => setProject(e.target.value)}
-                          className="w-full rounded-md h-10"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Revisi / Date
-                        </label>
-                        <Input
-                          placeholder="Enter date"
-                          value={date}
-                          onChange={(e) => setDate(e.target.value)}
-                          className="w-full rounded-md h-10"
-                        />
-                      </div>
-                      <Button
-                        className="w-full h-12 mt-4 bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-                        onClick={handleLaporan}
-                      >
-                        Download to Excel
-                      </Button>
-                    </div>
-                  </Modal>
-                </Card>
-
-                {/* Pagination Selalu di Bawah */}
-                {cartItems?.length > cartPageSize && (
-                  <div
-                    style={{
-                      textAlign: "right",
-                      justifyItems: "end",
-                    }}
-                  >
-                    <Pagination
-                      current={currentCartPage}
-                      total={cartItems?.length}
-                      pageSize={cartPageSize}
-                      onChange={onCartPageChange}
-                      size="large"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </Flex>
+        </div>
       </div>
     </div>
   );
