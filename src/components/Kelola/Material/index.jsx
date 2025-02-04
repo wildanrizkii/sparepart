@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import supabase from "@/app/utils/db";
 import { useRouter } from "next/navigation";
 import {
@@ -63,6 +64,21 @@ const Material = () => {
     setOpen(true);
   };
 
+  const showEditDrawer = (values) => {
+    setEditDrawerOpen(true);
+
+    editForm.setFieldsValue({
+      namamaterial: values.nama,
+    });
+  };
+
+  const hideEditDrawer = () => {
+    setEditDrawerOpen(false);
+    editForm.resetFields();
+  };
+
+  const handleEdit = () => {};
+
   const suffix = (
     <SearchOutlined
       style={{
@@ -77,11 +93,54 @@ const Material = () => {
       title: "No.",
       dataIndex: "no",
       width: 54,
+      key: "no",
       align: "center",
     },
     {
       title: "Nama Material",
       dataIndex: "nama",
+      key: "nama",
+    },
+    {
+      title: "Edit",
+      dataIndex: "edit",
+      key: "Edit",
+      width: 128,
+      align: "center",
+      render: (_, record) => (
+        <div className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+          <button
+            className="inline-block border-e p-3 text-gray-700 hover:bg-emerald-200 focus:relative transition-colors"
+            title="Ubah kategori"
+            onClick={() => showEditDrawer(record)}
+          >
+            <EditOutlined />
+          </button>
+
+          <Popconfirm
+            placement="bottomRight"
+            cancelText="Batal"
+            okText="Hapus"
+            title="Konfirmasi"
+            description="Anda yakin ingin menghapus material ini?"
+            // onConfirm={() => handleDeleteKategori(record.key)}
+            icon={
+              <QuestionCircleOutlined
+                style={{
+                  color: "red",
+                }}
+              />
+            }
+          >
+            <button
+              className="inline-block p-3 text-gray-700 hover:bg-red-200 focus:relative transition-colors"
+              title="Hapus kategori"
+            >
+              <DeleteOutlined />
+            </button>
+          </Popconfirm>
+        </div>
+      ),
     },
   ];
 
@@ -129,7 +188,6 @@ const Material = () => {
   }, [initialData]);
 
   const handleSubmit = async (values) => {
-    console.log(values);
     try {
       const { data, error } = await supabase.from("material").insert([
         {
@@ -244,6 +302,72 @@ const Material = () => {
             </Row>
           </Form>
         </Drawer>
+
+        <Drawer
+          width={720}
+          onClose={() => hideEditDrawer()}
+          open={editDrawerOpen}
+          styles={{
+            body: {
+              paddingBottom: 80,
+            },
+          }}
+          extra={<p className="text-lg font-bold">Edit Material</p>}
+          footer={
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: "10px",
+              }}
+            >
+              <Space>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="max-w-44 text-wrap rounded border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-600 hover:text-white hover:bg-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => form.submit()}
+                  type="button"
+                  className="min-w-36 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                >
+                  Simpan
+                </button>
+              </Space>
+            </div>
+          }
+        >
+          <Form layout="vertical" onFinish={handleEdit} form={editForm}>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="namamaterial"
+                  label="Nama Material"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="text"
+                    id="namamaterial"
+                    placeholder="Masukkan nomor part induk"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    required
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Drawer>
         <div className="grid gap-4">
           <h1 className="text-2xl font-medium col-span-1">Kelola Material</h1>
           <div className="grid gap-4">
@@ -268,7 +392,6 @@ const Material = () => {
         </div>
         <Flex gap="middle" vertical>
           <Table
-            //   rowSelection={rowSelection}
             columns={columns}
             dataSource={filteredData}
             pagination={{
@@ -277,10 +400,11 @@ const Material = () => {
             }}
             size="large"
             bordered={true}
-            //   onRow={(record) => ({
-            //     onClick: (e) => handleRowClick(e, record),
-            //     style: { cursor: "pointer" },
-            //   })}
+            // onRow={(record) => ({
+            //   // onClick: (e) => handleRowClick(e, record),
+            //   onClick: (e) => console.log(filteredData),
+            //   style: { cursor: "pointer" },
+            // })}
             loading={loading}
           />
         </Flex>
