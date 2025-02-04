@@ -58,6 +58,7 @@ const Supplier = () => {
 
   const onClose = () => {
     setOpen(false);
+    hideEditDrawer();
   };
 
   const showDrawer = () => {
@@ -444,7 +445,9 @@ const Supplier = () => {
           </Form>
         </Drawer>
         <div className="grid gap-4">
-          <h1 className="text-2xl font-medium col-span-1">Kelola Supplier</h1>
+          <h1 className="text-2xl font-medium col-span-1">
+            Kelola DWG Supplier
+          </h1>
           <div className="grid gap-4">
             <button
               onClick={showDrawer}

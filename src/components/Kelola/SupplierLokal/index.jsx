@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import supabase from "@/app/utils/db";
 import { useRouter } from "next/navigation";
 import {
@@ -42,11 +41,11 @@ import {
 } from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";
 
-const Material = () => {
+const SupplierLokal = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [idMaterial, setIdMaterial] = useState("");
+  const [idSupplier, setIdSupplier] = useState("");
   const [initialData, setInitialData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedPart, setSelectedPart] = useState(null);
@@ -67,12 +66,12 @@ const Material = () => {
   };
 
   const showEditDrawer = (values) => {
-    setIdMaterial(values.key);
+    setIdSupplier(values.key);
     setEditDrawerOpen(true);
 
     editForm.setFieldsValue({
-      id_material: values.key,
-      namamaterial: values.nama,
+      id_lokal: values.key,
+      namasupplier: values.nama,
     });
   };
 
@@ -84,76 +83,76 @@ const Material = () => {
   const handleEdit = async (values) => {
     try {
       const { data, error } = await supabase
-        .from("material")
-        .update({ nama: values.namamaterial })
-        .eq("id_material", idMaterial);
+        .from("supp_lokal")
+        .update({ nama: values.namasupplier })
+        .eq("id_lokal", idSupplier);
 
       if (error) {
         notification.error({
           message: "Error",
-          description: "Terjadi kesalahan saat mengubah material",
+          description: "Terjadi kesalahan saat mengubah supplier",
           placement: "top",
           duration: 3,
         });
         hideEditDrawer();
-        fetchMaterial();
+        fetchSupplier();
       } else {
         notification.success({
           message: "Berhasil",
-          description: "Material berhasil diubah",
+          description: "Supplier berhasil diubah",
           placement: "top",
           duration: 5,
         });
         hideEditDrawer();
-        fetchMaterial();
+        fetchSupplier();
       }
     } catch (error) {
       notification.error({
         message: "Error",
-        description: "Terjadi kesalahan saat mengubah material",
+        description: "Terjadi kesalahan saat mengubah supplier",
         placement: "top",
         duration: 3,
       });
       hideEditDrawer();
-      fetchMaterial();
+      fetchSupplier();
     }
   };
 
-  const handleDeleteMaterial = async (values) => {
+  const handleDeleteSupplier = async (values) => {
     try {
       const { data, error } = await supabase
-        .from("material")
+        .from("supp_lokal")
         .delete()
-        .eq("id_material", values);
+        .eq("id_lokal", values);
 
       if (error) {
         notification.error({
           message: "Error",
-          description: "Terjadi kesalahan saat menghapus material",
+          description: "Terjadi kesalahan saat menghapus supplier",
           placement: "top",
           duration: 3,
         });
 
-        fetchMaterial();
+        fetchSupplier();
       } else {
         notification.success({
           message: "Berhasil",
-          description: "Material berhasil dihapus",
+          description: "Supplier berhasil dihapus",
           placement: "top",
           duration: 5,
         });
 
-        fetchMaterial();
+        fetchSupplier();
       }
     } catch (error) {
       notification.error({
         message: "Error",
-        description: "Terjadi kesalahan saat menghapus material",
+        description: "Terjadi kesalahan saat menghapus supplier",
         placement: "top",
         duration: 3,
       });
 
-      fetchMaterial();
+      fetchSupplier();
     }
   };
 
@@ -171,13 +170,11 @@ const Material = () => {
       title: "No.",
       dataIndex: "no",
       width: 54,
-      key: "no",
       align: "center",
     },
     {
-      title: "Nama Material",
+      title: "Nama Supplier",
       dataIndex: "nama",
-      key: "nama",
     },
     {
       title: "Edit",
@@ -189,7 +186,7 @@ const Material = () => {
         <div className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
           <button
             className="inline-block border-e p-3 text-gray-700 hover:bg-emerald-200 focus:relative transition-colors"
-            title="Ubah material"
+            title="Ubah supplier"
             onClick={() => showEditDrawer(record)}
           >
             <EditOutlined />
@@ -200,8 +197,8 @@ const Material = () => {
             cancelText="Batal"
             okText="Hapus"
             title="Konfirmasi"
-            description="Anda yakin ingin menghapus material ini?"
-            onConfirm={() => handleDeleteMaterial(record.key)}
+            description="Anda yakin ingin menghapus supplier ini?"
+            onConfirm={() => handleDeleteSupplier(record.key)}
             icon={
               <QuestionCircleOutlined
                 style={{
@@ -212,7 +209,7 @@ const Material = () => {
           >
             <button
               className="inline-block p-3 text-gray-700 hover:bg-red-200 focus:relative transition-colors"
-              title="Hapus material"
+              title="Hapus supplier"
             >
               <DeleteOutlined />
             </button>
@@ -222,15 +219,15 @@ const Material = () => {
     },
   ];
 
-  const fetchMaterial = async () => {
+  const fetchSupplier = async () => {
     try {
-      const { data, error } = await supabase.from("material").select("*");
-      const materialData = data.map((row, index) => ({
-        key: row.id_material,
+      const { data, error } = await supabase.from("supp_lokal").select("*");
+      const supplierData = data.map((row, index) => ({
+        key: row.id_lokal,
         no: index + 1 + ".",
         nama: row.nama,
       }));
-      setInitialData(materialData);
+      setInitialData(supplierData);
     } catch (error) {
       console.error("Error fetching data: ", error);
     } finally {
@@ -258,7 +255,7 @@ const Material = () => {
 
   useEffect(() => {
     setFilteredData(initialData);
-    fetchMaterial();
+    fetchSupplier();
   }, []);
 
   useEffect(() => {
@@ -266,20 +263,21 @@ const Material = () => {
   }, [initialData]);
 
   const handleSubmit = async (values) => {
+    console.log(values);
     try {
-      const { data, error } = await supabase.from("material").insert([
+      const { data, error } = await supabase.from("supp_lokal").insert([
         {
-          id_material: await supabase
-            .from("material")
-            .select("id_material", { count: "exact", head: true })
+          id_lokal: await supabase
+            .from("supp_lokal")
+            .select("id_lokal", { count: "exact", head: true })
             .then((r) => r.count + 1),
-          nama: values.namamaterial,
+          nama: values.namasupplier,
         },
       ]);
       if (error) {
         console.error("Error inserting data:", error);
       } else {
-        fetchMaterial();
+        fetchSupplier();
       }
       onClose();
       form.resetFields();
@@ -287,14 +285,14 @@ const Material = () => {
       if (error) {
         notification.error({
           message: "Error",
-          description: "Terjadi kesalahan saat menambah material",
+          description: "Terjadi kesalahan saat menambah supplier",
           placement: "top",
           duration: 3,
         });
       } else {
         notification.success({
           message: "Berhasil",
-          description: "Material baru berhasil ditambahkan",
+          description: "Supplier baru berhasil ditambahkan",
           placement: "top",
           duration: 5,
         });
@@ -303,7 +301,7 @@ const Material = () => {
       console.error("Error on submit data!");
       notification.error({
         message: "Error",
-        description: "Terjadi kesalahan saat menambah material",
+        description: "Terjadi kesalahan saat menambah supplier",
         placement: "top",
         duration: 3,
       });
@@ -324,7 +322,7 @@ const Material = () => {
               paddingBottom: 80,
             },
           }}
-          extra={<p className="text-lg font-bold">Tambah Material</p>}
+          extra={<p className="text-lg font-bold">Tambah Supplier Lokal</p>}
           footer={
             <div
               style={{
@@ -356,8 +354,8 @@ const Material = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  name="namamaterial"
-                  label="Nama Material"
+                  name="namasupplier"
+                  label="Nama Supplier"
                   rules={[
                     {
                       required: true,
@@ -367,7 +365,7 @@ const Material = () => {
                 >
                   <Input
                     type="text"
-                    id="namamaterial"
+                    id="namasupplier"
                     placeholder="Masukkan nomor part induk"
                     style={{
                       minHeight: 39,
@@ -390,7 +388,7 @@ const Material = () => {
               paddingBottom: 80,
             },
           }}
-          extra={<p className="text-lg font-bold">Edit Material</p>}
+          extra={<p className="text-lg font-bold">Edit Supplier Lokal</p>}
           footer={
             <div
               style={{
@@ -422,8 +420,8 @@ const Material = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  name="namamaterial"
-                  label="Nama Material"
+                  name="namasupplier"
+                  label="Nama Supplier"
                   rules={[
                     {
                       required: true,
@@ -433,8 +431,8 @@ const Material = () => {
                 >
                   <Input
                     type="text"
-                    id="namamaterial"
-                    placeholder="Masukkan nama material"
+                    id="namasupplier"
+                    placeholder="Masukkan nama supplier"
                     style={{
                       minHeight: 39,
                     }}
@@ -447,21 +445,23 @@ const Material = () => {
           </Form>
         </Drawer>
         <div className="grid gap-4">
-          <h1 className="text-2xl font-medium col-span-1">Kelola Material</h1>
+          <h1 className="text-2xl font-medium col-span-1">
+            Kelola Supplier Lokal
+          </h1>
           <div className="grid gap-4">
             <button
               onClick={showDrawer}
               type="submit"
               className="max-w-44 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
             >
-              Tambah Material
+              Tambah Supplier
             </button>
           </div>
         </div>
 
         <div>
           <Input
-            placeholder="Cari Nama Material"
+            placeholder="Cari Nama Supplier"
             size="large"
             value={searchText}
             onChange={(e) => handleSearch(e.target.value)}
@@ -478,11 +478,10 @@ const Material = () => {
             }}
             size="large"
             bordered={true}
-            // onRow={(record) => ({
-            //   // onClick: (e) => handleRowClick(e, record),
-            //   onClick: (e) => console.log(filteredData),
-            //   style: { cursor: "pointer" },
-            // })}
+            //   onRow={(record) => ({
+            //     onClick: (e) => handleRowClick(e, record),
+            //     style: { cursor: "pointer" },
+            //   })}
             loading={loading}
           />
         </Flex>
@@ -491,4 +490,4 @@ const Material = () => {
   );
 };
 
-export default Material;
+export default SupplierLokal;

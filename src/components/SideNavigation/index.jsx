@@ -35,6 +35,7 @@ import {
   AppstoreOutlined,
   AppstoreAddOutlined,
   LayoutOutlined,
+  BorderOuterOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -172,8 +173,28 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                     {
                       key: "2-4",
                       icon: <BuildOutlined style={{ fontSize: "20px" }} />,
-                      label: "Supplier",
-                      onClick: () => router.push("/kelola/supplier"),
+                      label: "DWG Supplier",
+                      onClick: () => router.push("/kelola/dwg-supplier"),
+                    },
+                    {
+                      key: "2-5",
+                      icon: <BuildOutlined style={{ fontSize: "20px" }} />,
+                      label: "Supplier Impor",
+                      onClick: () => router.push("/kelola/supplier-impor"),
+                    },
+                    {
+                      key: "2-6",
+                      icon: <BuildOutlined style={{ fontSize: "20px" }} />,
+                      label: "Supplier Lokal",
+                      onClick: () => router.push("/kelola/supplier-lokal"),
+                    },
+                    {
+                      key: "2-7",
+                      icon: (
+                        <BorderOuterOutlined style={{ fontSize: "20px" }} />
+                      ),
+                      label: "Maker",
+                      onClick: () => router.push("/kelola/maker"),
                     },
                   ],
                 },

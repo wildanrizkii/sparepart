@@ -42,11 +42,11 @@ import {
 } from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";
 
-const Material = () => {
+const Maker = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [idMaterial, setIdMaterial] = useState("");
+  const [idMaker, setIdMaker] = useState("");
   const [initialData, setInitialData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedPart, setSelectedPart] = useState(null);
@@ -67,12 +67,12 @@ const Material = () => {
   };
 
   const showEditDrawer = (values) => {
-    setIdMaterial(values.key);
+    setIdMaker(values.key);
     setEditDrawerOpen(true);
 
     editForm.setFieldsValue({
-      id_material: values.key,
-      namamaterial: values.nama,
+      id_maker: values.key,
+      namamaker: values.nama,
     });
   };
 
@@ -84,76 +84,76 @@ const Material = () => {
   const handleEdit = async (values) => {
     try {
       const { data, error } = await supabase
-        .from("material")
-        .update({ nama: values.namamaterial })
-        .eq("id_material", idMaterial);
+        .from("maker")
+        .update({ nama: values.namamaker })
+        .eq("id_maker", idMaker);
 
       if (error) {
         notification.error({
           message: "Error",
-          description: "Terjadi kesalahan saat mengubah material",
+          description: "Terjadi kesalahan saat mengubah maker",
           placement: "top",
           duration: 3,
         });
         hideEditDrawer();
-        fetchMaterial();
+        fetchMaker();
       } else {
         notification.success({
           message: "Berhasil",
-          description: "Material berhasil diubah",
+          description: "Maker berhasil diubah",
           placement: "top",
           duration: 5,
         });
         hideEditDrawer();
-        fetchMaterial();
+        fetchMaker();
       }
     } catch (error) {
       notification.error({
         message: "Error",
-        description: "Terjadi kesalahan saat mengubah material",
+        description: "Terjadi kesalahan saat mengubah maker",
         placement: "top",
         duration: 3,
       });
       hideEditDrawer();
-      fetchMaterial();
+      fetchMaker();
     }
   };
 
-  const handleDeleteMaterial = async (values) => {
+  const handleDeleteMaker = async (values) => {
     try {
       const { data, error } = await supabase
-        .from("material")
+        .from("maker")
         .delete()
-        .eq("id_material", values);
+        .eq("id_maker", values);
 
       if (error) {
         notification.error({
           message: "Error",
-          description: "Terjadi kesalahan saat menghapus material",
+          description: "Terjadi kesalahan saat menghapus maker",
           placement: "top",
           duration: 3,
         });
 
-        fetchMaterial();
+        fetchMaker();
       } else {
         notification.success({
           message: "Berhasil",
-          description: "Material berhasil dihapus",
+          description: "Maker berhasil dihapus",
           placement: "top",
           duration: 5,
         });
 
-        fetchMaterial();
+        fetchMaker();
       }
     } catch (error) {
       notification.error({
         message: "Error",
-        description: "Terjadi kesalahan saat menghapus material",
+        description: "Terjadi kesalahan saat menghapus maker",
         placement: "top",
         duration: 3,
       });
 
-      fetchMaterial();
+      fetchMaker();
     }
   };
 
@@ -175,7 +175,7 @@ const Material = () => {
       align: "center",
     },
     {
-      title: "Nama Material",
+      title: "Nama Maker",
       dataIndex: "nama",
       key: "nama",
     },
@@ -189,7 +189,7 @@ const Material = () => {
         <div className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
           <button
             className="inline-block border-e p-3 text-gray-700 hover:bg-emerald-200 focus:relative transition-colors"
-            title="Ubah material"
+            title="Ubah maker"
             onClick={() => showEditDrawer(record)}
           >
             <EditOutlined />
@@ -200,8 +200,8 @@ const Material = () => {
             cancelText="Batal"
             okText="Hapus"
             title="Konfirmasi"
-            description="Anda yakin ingin menghapus material ini?"
-            onConfirm={() => handleDeleteMaterial(record.key)}
+            description="Anda yakin ingin menghapus maker ini?"
+            onConfirm={() => handleDeleteMaker(record.key)}
             icon={
               <QuestionCircleOutlined
                 style={{
@@ -212,7 +212,7 @@ const Material = () => {
           >
             <button
               className="inline-block p-3 text-gray-700 hover:bg-red-200 focus:relative transition-colors"
-              title="Hapus material"
+              title="Hapus maker"
             >
               <DeleteOutlined />
             </button>
@@ -222,15 +222,15 @@ const Material = () => {
     },
   ];
 
-  const fetchMaterial = async () => {
+  const fetchMaker = async () => {
     try {
-      const { data, error } = await supabase.from("material").select("*");
-      const materialData = data.map((row, index) => ({
-        key: row.id_material,
+      const { data, error } = await supabase.from("maker").select("*");
+      const makerData = data.map((row, index) => ({
+        key: row.id_maker,
         no: index + 1 + ".",
         nama: row.nama,
       }));
-      setInitialData(materialData);
+      setInitialData(makerData);
     } catch (error) {
       console.error("Error fetching data: ", error);
     } finally {
@@ -258,7 +258,7 @@ const Material = () => {
 
   useEffect(() => {
     setFilteredData(initialData);
-    fetchMaterial();
+    fetchMaker();
   }, []);
 
   useEffect(() => {
@@ -267,19 +267,19 @@ const Material = () => {
 
   const handleSubmit = async (values) => {
     try {
-      const { data, error } = await supabase.from("material").insert([
+      const { data, error } = await supabase.from("maker").insert([
         {
-          id_material: await supabase
-            .from("material")
-            .select("id_material", { count: "exact", head: true })
+          id_maker: await supabase
+            .from("maker")
+            .select("id_maker", { count: "exact", head: true })
             .then((r) => r.count + 1),
-          nama: values.namamaterial,
+          nama: values.namamaker,
         },
       ]);
       if (error) {
         console.error("Error inserting data:", error);
       } else {
-        fetchMaterial();
+        fetchMaker();
       }
       onClose();
       form.resetFields();
@@ -287,14 +287,14 @@ const Material = () => {
       if (error) {
         notification.error({
           message: "Error",
-          description: "Terjadi kesalahan saat menambah material",
+          description: "Terjadi kesalahan saat menambah maker",
           placement: "top",
           duration: 3,
         });
       } else {
         notification.success({
           message: "Berhasil",
-          description: "Material baru berhasil ditambahkan",
+          description: "Maker baru berhasil ditambahkan",
           placement: "top",
           duration: 5,
         });
@@ -303,7 +303,7 @@ const Material = () => {
       console.error("Error on submit data!");
       notification.error({
         message: "Error",
-        description: "Terjadi kesalahan saat menambah material",
+        description: "Terjadi kesalahan saat menambah maker",
         placement: "top",
         duration: 3,
       });
@@ -324,7 +324,7 @@ const Material = () => {
               paddingBottom: 80,
             },
           }}
-          extra={<p className="text-lg font-bold">Tambah Material</p>}
+          extra={<p className="text-lg font-bold">Tambah Maker</p>}
           footer={
             <div
               style={{
@@ -356,8 +356,8 @@ const Material = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  name="namamaterial"
-                  label="Nama Material"
+                  name="namamaker"
+                  label="Nama Maker"
                   rules={[
                     {
                       required: true,
@@ -367,8 +367,8 @@ const Material = () => {
                 >
                   <Input
                     type="text"
-                    id="namamaterial"
-                    placeholder="Masukkan nomor part induk"
+                    id="namamaker"
+                    placeholder="Masukkan nama maker"
                     style={{
                       minHeight: 39,
                     }}
@@ -390,7 +390,7 @@ const Material = () => {
               paddingBottom: 80,
             },
           }}
-          extra={<p className="text-lg font-bold">Edit Material</p>}
+          extra={<p className="text-lg font-bold">Edit Maker</p>}
           footer={
             <div
               style={{
@@ -422,8 +422,8 @@ const Material = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  name="namamaterial"
-                  label="Nama Material"
+                  name="namamaker"
+                  label="Nama Maker"
                   rules={[
                     {
                       required: true,
@@ -433,8 +433,8 @@ const Material = () => {
                 >
                   <Input
                     type="text"
-                    id="namamaterial"
-                    placeholder="Masukkan nama material"
+                    id="namamaker"
+                    placeholder="Masukkan nama maker"
                     style={{
                       minHeight: 39,
                     }}
@@ -447,21 +447,21 @@ const Material = () => {
           </Form>
         </Drawer>
         <div className="grid gap-4">
-          <h1 className="text-2xl font-medium col-span-1">Kelola Material</h1>
+          <h1 className="text-2xl font-medium col-span-1">Kelola Maker</h1>
           <div className="grid gap-4">
             <button
               onClick={showDrawer}
               type="submit"
               className="max-w-44 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
             >
-              Tambah Material
+              Tambah Maker
             </button>
           </div>
         </div>
 
         <div>
           <Input
-            placeholder="Cari Nama Material"
+            placeholder="Cari Nama Maker"
             size="large"
             value={searchText}
             onChange={(e) => handleSearch(e.target.value)}
@@ -491,4 +491,4 @@ const Material = () => {
   );
 };
 
-export default Material;
+export default Maker;
