@@ -45,6 +45,7 @@ const Supplier = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
+  const [idSupplier, setIdSupplier] = useState("");
   const [initialData, setInitialData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedPart, setSelectedPart] = useState(null);
@@ -61,6 +62,97 @@ const Supplier = () => {
 
   const showDrawer = () => {
     setOpen(true);
+  };
+
+  const showEditDrawer = (values) => {
+    setIdSupplier(values.key);
+    setEditDrawerOpen(true);
+
+    editForm.setFieldsValue({
+      id_dwg: values.key,
+      namasupplier: values.nama,
+    });
+  };
+
+  const hideEditDrawer = () => {
+    setEditDrawerOpen(false);
+    editForm.resetFields();
+  };
+
+  const handleEdit = async (values) => {
+    try {
+      const { data, error } = await supabase
+        .from("dwg_supplier")
+        .update({ nama: values.namasupplier })
+        .eq("id_dwg", idSupplier);
+
+      if (error) {
+        notification.error({
+          message: "Error",
+          description: "Terjadi kesalahan saat mengubah supplier",
+          placement: "top",
+          duration: 3,
+        });
+        hideEditDrawer();
+        fetchSupplier();
+      } else {
+        notification.success({
+          message: "Berhasil",
+          description: "Supplier berhasil diubah",
+          placement: "top",
+          duration: 5,
+        });
+        hideEditDrawer();
+        fetchSupplier();
+      }
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: "Terjadi kesalahan saat mengubah supplier",
+        placement: "top",
+        duration: 3,
+      });
+      hideEditDrawer();
+      fetchSupplier();
+    }
+  };
+
+  const handleDeleteSupplier = async (values) => {
+    try {
+      const { data, error } = await supabase
+        .from("dwg_supplier")
+        .delete()
+        .eq("id_dwg", values);
+
+      if (error) {
+        notification.error({
+          message: "Error",
+          description: "Terjadi kesalahan saat menghapus supplier",
+          placement: "top",
+          duration: 3,
+        });
+
+        fetchSupplier();
+      } else {
+        notification.success({
+          message: "Berhasil",
+          description: "Supplier berhasil dihapus",
+          placement: "top",
+          duration: 5,
+        });
+
+        fetchSupplier();
+      }
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: "Terjadi kesalahan saat menghapus supplier",
+        placement: "top",
+        duration: 3,
+      });
+
+      fetchSupplier();
+    }
   };
 
   const suffix = (
@@ -82,6 +174,47 @@ const Supplier = () => {
     {
       title: "Nama Supplier",
       dataIndex: "nama",
+    },
+    {
+      title: "Edit",
+      dataIndex: "edit",
+      key: "Edit",
+      width: 128,
+      align: "center",
+      render: (_, record) => (
+        <div className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+          <button
+            className="inline-block border-e p-3 text-gray-700 hover:bg-emerald-200 focus:relative transition-colors"
+            title="Ubah supplier"
+            onClick={() => showEditDrawer(record)}
+          >
+            <EditOutlined />
+          </button>
+
+          <Popconfirm
+            placement="bottomRight"
+            cancelText="Batal"
+            okText="Hapus"
+            title="Konfirmasi"
+            description="Anda yakin ingin menghapus supplier ini?"
+            onConfirm={() => handleDeleteSupplier(record.key)}
+            icon={
+              <QuestionCircleOutlined
+                style={{
+                  color: "red",
+                }}
+              />
+            }
+          >
+            <button
+              className="inline-block p-3 text-gray-700 hover:bg-red-200 focus:relative transition-colors"
+              title="Hapus supplier"
+            >
+              <DeleteOutlined />
+            </button>
+          </Popconfirm>
+        </div>
+      ),
     },
   ];
 
@@ -244,6 +377,72 @@ const Supplier = () => {
             </Row>
           </Form>
         </Drawer>
+
+        <Drawer
+          width={720}
+          onClose={() => hideEditDrawer()}
+          open={editDrawerOpen}
+          styles={{
+            body: {
+              paddingBottom: 80,
+            },
+          }}
+          extra={<p className="text-lg font-bold">Edit Supplier</p>}
+          footer={
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: "10px",
+              }}
+            >
+              <Space>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="max-w-44 text-wrap rounded border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-600 hover:text-white hover:bg-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => editForm.submit()}
+                  type="button"
+                  className="min-w-36 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                >
+                  Simpan
+                </button>
+              </Space>
+            </div>
+          }
+        >
+          <Form layout="vertical" onFinish={handleEdit} form={editForm}>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="namasupplier"
+                  label="Nama Supplier"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="text"
+                    id="namasupplier"
+                    placeholder="Masukkan nama supplier"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    required
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Drawer>
         <div className="grid gap-4">
           <h1 className="text-2xl font-medium col-span-1">Kelola Supplier</h1>
           <div className="grid gap-4">
@@ -268,7 +467,6 @@ const Supplier = () => {
         </div>
         <Flex gap="middle" vertical>
           <Table
-            //   rowSelection={rowSelection}
             columns={columns}
             dataSource={filteredData}
             pagination={{

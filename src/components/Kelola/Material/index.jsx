@@ -46,6 +46,7 @@ const Material = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
+  const [idMaterial, setIdMaterial] = useState("");
   const [initialData, setInitialData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedPart, setSelectedPart] = useState(null);
@@ -65,9 +66,11 @@ const Material = () => {
   };
 
   const showEditDrawer = (values) => {
+    setIdMaterial(values.key);
     setEditDrawerOpen(true);
 
     editForm.setFieldsValue({
+      id_material: values.key,
       namamaterial: values.nama,
     });
   };
@@ -77,7 +80,81 @@ const Material = () => {
     editForm.resetFields();
   };
 
-  const handleEdit = () => {};
+  const handleEdit = async (values) => {
+    try {
+      const { data, error } = await supabase
+        .from("material")
+        .update({ nama: values.namamaterial })
+        .eq("id_material", idMaterial);
+
+      if (error) {
+        notification.error({
+          message: "Error",
+          description: "Terjadi kesalahan saat mengubah material",
+          placement: "top",
+          duration: 3,
+        });
+        hideEditDrawer();
+        fetchMaterial();
+      } else {
+        notification.success({
+          message: "Berhasil",
+          description: "Material berhasil diubah",
+          placement: "top",
+          duration: 5,
+        });
+        hideEditDrawer();
+        fetchMaterial();
+      }
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: "Terjadi kesalahan saat mengubah material",
+        placement: "top",
+        duration: 3,
+      });
+      hideEditDrawer();
+      fetchMaterial();
+    }
+  };
+
+  const handleDeleteMaterial = async (values) => {
+    try {
+      const { data, error } = await supabase
+        .from("material")
+        .delete()
+        .eq("id_material", values);
+
+      if (error) {
+        notification.error({
+          message: "Error",
+          description: "Terjadi kesalahan saat menghapus material",
+          placement: "top",
+          duration: 3,
+        });
+
+        fetchMaterial();
+      } else {
+        notification.success({
+          message: "Berhasil",
+          description: "Material berhasil dihapus",
+          placement: "top",
+          duration: 5,
+        });
+
+        fetchMaterial();
+      }
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: "Terjadi kesalahan saat menghapus material",
+        placement: "top",
+        duration: 3,
+      });
+
+      fetchMaterial();
+    }
+  };
 
   const suffix = (
     <SearchOutlined
@@ -111,7 +188,7 @@ const Material = () => {
         <div className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
           <button
             className="inline-block border-e p-3 text-gray-700 hover:bg-emerald-200 focus:relative transition-colors"
-            title="Ubah kategori"
+            title="Ubah material"
             onClick={() => showEditDrawer(record)}
           >
             <EditOutlined />
@@ -123,7 +200,7 @@ const Material = () => {
             okText="Hapus"
             title="Konfirmasi"
             description="Anda yakin ingin menghapus material ini?"
-            // onConfirm={() => handleDeleteKategori(record.key)}
+            onConfirm={() => handleDeleteMaterial(record.key)}
             icon={
               <QuestionCircleOutlined
                 style={{
@@ -134,7 +211,7 @@ const Material = () => {
           >
             <button
               className="inline-block p-3 text-gray-700 hover:bg-red-200 focus:relative transition-colors"
-              title="Hapus kategori"
+              title="Hapus material"
             >
               <DeleteOutlined />
             </button>
@@ -330,7 +407,7 @@ const Material = () => {
                   Batal
                 </button>
                 <button
-                  onClick={() => form.submit()}
+                  onClick={() => editForm.submit()}
                   type="button"
                   className="min-w-36 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
                 >
@@ -356,7 +433,7 @@ const Material = () => {
                   <Input
                     type="text"
                     id="namamaterial"
-                    placeholder="Masukkan nomor part induk"
+                    placeholder="Masukkan nama supplier"
                     style={{
                       minHeight: 39,
                     }}

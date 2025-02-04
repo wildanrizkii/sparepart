@@ -765,7 +765,7 @@ const Dashboard = () => {
                 </Modal>
               </Card>
 
-              {cartItems?.length > cartPageSize && (
+              {cartItems?.length > 0 && (
                 <div className="mt-4 flex justify-end">
                   <Pagination
                     current={currentCartPage}
@@ -779,7 +779,7 @@ const Dashboard = () => {
 
               {cartItems?.length > 0 && (
                 <Button
-                  className="w-full mt-2 bg-blue-500 text-white hover:bg-blue-600"
+                  className="w-full mt-2 p-5 bg-blue-500 text-white hover:bg-blue-600"
                   onClick={() => setVisible(true)}
                 >
                   Generate excel
