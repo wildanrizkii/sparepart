@@ -78,19 +78,16 @@ const PartAnak = () => {
     setIdPartAnak(values.key);
     setEditDrawerOpen(true);
 
-    console.log(values);
-
     editForm.setFieldsValue({
       id_pa: values.key,
-      namapartanak: values.part_name,
-      dwgsupplier: values.dwg,
-      nopartanak: values.nomor_pa,
-      nopartanakupdate: values.nomor_pa_update,
-      supplier: (() => {
-        const lokal = values.supplier ? `${row.nama_lokal} (lokal)` : "";
-        const impor = row.nama_impor ? `${row.nama_impor} (impor)` : "";
-        return [lokal, impor].filter(Boolean).join(", ") || "-";
-      })(),
+      namapartanak: values.part_name == "-" ? null : values.part_name,
+      dwgsupplier: values.dwg == "-" ? null : values.dwg,
+      nopartanak: values.nomor_pa == "-" ? null : values.nomor_pa,
+      nopartanakupdate:
+        values.nomor_pa_update == "-" ? null : values.nomor_pa_update,
+      supplier: values.supplier == "-" ? null : values.supplier,
+      material: values.material == "-" ? null : values.material,
+      maker: values.maker == "-" ? null : values.maker,
     });
   };
 
@@ -711,7 +708,7 @@ const PartAnak = () => {
                   label="DWG Supplier"
                   rules={[
                     {
-                      required: true,
+                      required: false,
                       message: "Isi field ini terlebih dahulu!",
                     },
                   ]}
@@ -744,7 +741,7 @@ const PartAnak = () => {
                   label="Maker"
                   rules={[
                     {
-                      required: true,
+                      required: false,
                       message: "Isi field ini terlebih dahulu!",
                     },
                   ]}
@@ -816,39 +813,6 @@ const PartAnak = () => {
               </Col>
             </Row>
 
-            {/* <Row gutter={16}>
-              <Col span={24}>
-                <Form.Item
-                  name="supplierimpor"
-                  label="Supplier Impor"
-                  rules={[
-                    {
-                      required: false,
-                      message: "Isi field ini terlebih dahulu!",
-                    },
-                  ]}
-                >
-                  <Select
-                    showSearch
-                    className="w-full"
-                    placeholder="Pilih supplier impor"
-                    style={{
-                      minHeight: 39,
-                    }}
-                    allowClear
-                    filterOption={(input, option) =>
-                      option.nama.toLowerCase().includes(input.toLowerCase())
-                    }
-                    options={supplierImpor.map((item) => ({
-                      label: <span key={item.id_impor}>{item.nama}</span>,
-                      value: item.id_impor,
-                      nama: item.nama,
-                    }))}
-                  />
-                </Form.Item>
-              </Col>
-            </Row> */}
-
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
@@ -856,7 +820,7 @@ const PartAnak = () => {
                   label="Material"
                   rules={[
                     {
-                      required: true,
+                      required: false,
                       message: "Isi field ini terlebih dahulu!",
                     },
                   ]}
