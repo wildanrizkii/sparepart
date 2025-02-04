@@ -282,7 +282,7 @@ const PartInduk = () => {
         </Drawer>
         <div className="grid gap-4">
           <h1 className="text-2xl font-medium col-span-1">Kelola Part Induk</h1>
-          <div className="grid gap-4 justify-end">
+          <div className="grid gap-4">
             <button
               onClick={showDrawer}
               type="submit"

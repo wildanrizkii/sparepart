@@ -2,8 +2,8 @@ import React from "react";
 import "./globals.css";
 
 export const metadata = {
-  title: "Sparepart",
-  description: "Sparepart App",
+  title: "CMW",
+  description: "Cipta Mandiri Wirasakti",
 };
 
 export default function RootLayout({ children }) {

@@ -11,6 +11,7 @@ import {
   Badge,
   Pagination,
   Modal,
+  notification,
 } from "antd";
 import {
   SearchOutlined,
@@ -306,14 +307,26 @@ const Dashboard = () => {
   };
 
   const handleLaporan = async () => {
-    console.log("Customer Name:", customerName);
-    console.log("Part Name:", partName);
-    console.log("Part No.:", partNo);
-    console.log("Project:", project);
-    console.log("Date:", date);
+    // console.log("Customer Name:", customerName);
+    // console.log("Part Name:", partName);
+    // console.log("Part No.:", partNo);
+    // console.log("Project:", project);
+    // console.log("Date:", date);
 
     try {
       exportToExcel();
+      setVisible(false);
+      setCustomerName("");
+      setPartName("");
+      setPartNo("");
+      setProject("");
+      setDate("");
+      notification.success({
+        message: "Laporan",
+        description: "Laporan berhasil diunduh",
+        placement: "top",
+        duration: 5,
+      });
     } catch (error) {
       console.error("Error generate laporan: ", error);
     }
@@ -404,8 +417,6 @@ const Dashboard = () => {
 
         if (error) {
           console.error("Error inserting data:", error);
-        } else {
-          console.log("Insert successful:", data);
         }
 
         if (data.length > 0) {
@@ -420,8 +431,6 @@ const Dashboard = () => {
           ]);
           if (error) {
             console.error("Error inserting data:", error);
-          } else {
-            console.log("Insert successful:", data);
           }
         }
       }
@@ -440,11 +449,6 @@ const Dashboard = () => {
 
             if (error) {
               console.error("Error deleting data:", error);
-            } else {
-              console.log(
-                `Data with id_draft ${draftItem.id_draft} deleted successfully:`,
-                data
-              );
             }
           }
         }
