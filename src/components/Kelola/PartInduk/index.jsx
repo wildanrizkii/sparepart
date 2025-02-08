@@ -91,16 +91,42 @@ const PartInduk = () => {
 
   const fetchPartInduk = async () => {
     try {
-      const { data, error } = await supabase.from("part_induk").select("*");
-      const partindukData = data.map((row, index) => ({
+      let allData = [];
+      let from = 0;
+      let to = 999;
+
+      while (true) {
+        const { data, error } = await supabase
+          .from("part_induk")
+          .select("*")
+          .range(from, to); // Ambil data dalam batch
+
+        if (error) {
+          console.error("Error fetching data:", error);
+          break;
+        }
+
+        if (data.length === 0) break; // Jika tidak ada data lagi, berhenti
+
+        allData = [...allData, ...data]; // Gabungkan data ke dalam array utama
+
+        from += 1000;
+        to += 1000;
+      }
+
+      // console.log("Total Data Fetched:", allData.length);
+
+      const partindukData = allData.map((row, index) => ({
         key: row.id_pi,
         no: index + 1 + ".",
-        nomor_pi: row.no_part,
-        nomor_pi_update: row.no_part_update,
+        nomor_pi: row.no_part ?? "-",
+        nomor_pi_update: row.no_part_update ?? "-",
       }));
+
       setInitialData(partindukData);
     } catch (error) {
-      console.error("Error fetching data: ", error);
+      console.error("Error fetching data:", error);
+      setInitialData([]);
     } finally {
       setLoading(false);
     }

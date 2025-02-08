@@ -48,21 +48,21 @@ const PartAnak = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [material, setMaterial] = useState([]);
-  const [supplierLokal, setSupplierLokal] = useState([]);
-  const [supplierImpor, setSupplierImpor] = useState([]);
   const [idPartAnak, setIdPartAnak] = useState("");
   const [searchText, setSearchText] = useState("");
   const [dwgSupplier, setDwgSupplier] = useState([]);
   const [initialData, setInitialData] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
+  const [supplierLokal, setSupplierLokal] = useState([]);
+  const [supplierImpor, setSupplierImpor] = useState([]);
   const [selectedPart, setSelectedPart] = useState(null);
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
 
   const router = useRouter();
-  const [form] = useForm();
+  const [form] = Form.useForm();
   const [editForm] = Form.useForm();
 
   const onClose = () => {
@@ -75,6 +75,7 @@ const PartAnak = () => {
   };
 
   const showEditDrawer = (values) => {
+    // console.log(values);
     setIdPartAnak(values.key);
     setEditDrawerOpen(true);
 
@@ -85,9 +86,11 @@ const PartAnak = () => {
       nopartanak: values.nomor_pa == "-" ? null : values.nomor_pa,
       nopartanakupdate:
         values.nomor_pa_update == "-" ? null : values.nomor_pa_update,
-      supplier: values.supplier == "-" ? null : values.supplier,
-      material: values.material == "-" ? null : values.material,
-      maker: values.maker == "-" ? null : values.maker,
+      supplier: values.supplier == null ? null : values.supplier,
+      supplierlokal: values.supplierlokal == null ? null : values.supplierlokal,
+      supplierimpor: values.supplierimpor == null ? null : values.supplierimpor,
+      material: values.material == null ? null : values.material,
+      maker: values.maker == null ? null : values.maker,
     });
   };
 
@@ -125,8 +128,12 @@ const PartAnak = () => {
       dataIndex: "part_name",
     },
     {
-      title: "Supplier",
-      dataIndex: "supplier",
+      title: "Supplier Lokal",
+      dataIndex: "namalokal",
+    },
+    {
+      title: "Supplier Impor",
+      dataIndex: "namaimpor",
     },
     {
       title: "Maker",
@@ -146,6 +153,7 @@ const PartAnak = () => {
             onClick={(e) => {
               e.stopPropagation();
               showEditDrawer(record);
+              // console.log(record);
             }}
           >
             <EditOutlined />
@@ -190,33 +198,50 @@ const PartAnak = () => {
 
   const fetchPartAnak = async () => {
     try {
-      const { data: response, error: responseError } = await supabase
-        .from("view_part_anak_detail")
-        .select("*");
+      let allData = [];
+      let from = 0;
+      let to = 999;
 
-      if (responseError) {
-        console.error("Error fetching data:", error);
+      while (true) {
+        const { data, error } = await supabase
+          .from("view_part_anak_detail")
+          .select("*")
+          .range(from, to); // Ambil data dari index ke-from hingga ke-to
+
+        if (error) {
+          console.error("Error fetching data:", error);
+          break;
+        }
+
+        if (data.length === 0) break; // Jika tidak ada data lagi, berhenti
+
+        allData = [...allData, ...data]; // Gabungkan data ke dalam array utama
+
+        from += 1000;
+        to += 1000;
       }
 
-      const partAnakData = response.map((row, index) => ({
+      // console.log("Total Data Fetched:", allData.length);
+
+      const partAnakData = allData.map((row, index) => ({
         key: row.id_pa,
         no: index + 1 + ".",
-        nomor_pa: row.no_part || "-",
-        nomor_pa_update: row.no_part_update || "-",
-        supplier: (() => {
-          const lokal = row.nama_lokal ? `${row.nama_lokal} (lokal)` : "";
-          const impor = row.nama_impor ? `${row.nama_impor} (impor)` : "";
-          return [lokal, impor].filter(Boolean).join(", ") || "-";
-        })(),
-        maker: row.nama_maker || "-",
-        part_name: row.nama || "",
-        no_cmw: row.no_cmw,
-        dwg: row.nama_dwg,
-        material: row.nama_material,
+        nomor_pa: row.no_part ?? "-",
+        nomor_pa_update: row.no_part_update ?? "-",
+        namalokal: row.nama_lokal ?? "-",
+        namaimpor: row.nama_impor ?? "-",
+        supplierlokal: row.id_lokal ?? "-",
+        supplierimpor: row.id_impor ?? "-",
+        maker: row.nama_maker ?? "-",
+        part_name: row.nama ?? "-",
+        no_cmw: row.no_cmw ?? "-",
+        dwg: row.nama_dwg ?? "-",
+        material: row.nama_material ?? "-",
       }));
-      setInitialData(partAnakData || []);
+
+      setInitialData(partAnakData);
     } catch (error) {
-      console.error("Error fetching data: ", error);
+      console.error("Error fetching data:", error);
       setInitialData([]);
     } finally {
       setLoading(false);
@@ -375,14 +400,22 @@ const PartAnak = () => {
 
   const handleSubmit = async (values) => {
     try {
+      // console.log(values);
       const { data, error } = await supabase.from("part_anak").insert([
         {
           id_pa: await supabase
             .from("part_anak")
-            .select("id_pi", { count: "exact", head: true })
+            .select("id_pa", { count: "exact", head: true })
             .then((r) => r.count + 1),
           no_part: values.nopartanak,
           no_part_update: values.nopartanakupdate,
+          id_dwg: values.dwgsupplier,
+          id_material: values.material,
+          id_lokal: values.supplierlokal,
+          id_impor: values.supplierimpor,
+          id_maker: values.maker,
+          no_cmw: values.nocmw,
+          nama: values.namapartanak,
         },
       ]);
       if (error) {
@@ -398,6 +431,7 @@ const PartAnak = () => {
           placement: "top",
           duration: 3,
         });
+        fetchPartAnak();
       } else {
         notification.success({
           message: "Berhasil",
@@ -405,6 +439,7 @@ const PartAnak = () => {
           placement: "top",
           duration: 5,
         });
+        fetchPartAnak();
       }
     } catch (error) {
       console.error("Error on submit data!");
@@ -420,40 +455,51 @@ const PartAnak = () => {
   };
 
   const handleEdit = async (values) => {
+    console.log(values);
     try {
       const { data, error } = await supabase
         .from("part_anak")
-        .update({ nama: values.nama })
-        .eq("id_pa", id_pa);
+        .update({
+          no_part: values.nopartanak,
+          no_part_update: values.nopartanakupdate,
+          id_dwg: values.dwgsupplier,
+          id_material: values.material,
+          id_lokal: values.supplierlokal,
+          id_impor: values.supplierimpor,
+          id_maker: values.maker,
+          no_cmw: values.nocmw,
+          nama: values.namapartanak,
+        })
+        .eq("id_pa", idPartAnak); // Pastikan id_pa sesuai dengan data yang diedit
 
       if (error) {
+        console.error("Error updating data:", error);
         notification.error({
           message: "Error",
-          description: "Terjadi kesalahan saat mengubah supplier",
+          description: "Terjadi kesalahan saat mengubah part anak",
           placement: "top",
           duration: 3,
         });
-        hideEditDrawer();
-        fetchPartAnak();
       } else {
         notification.success({
           message: "Berhasil",
-          description: "Supplier berhasil diubah",
+          description: "Part anak berhasil diperbarui",
           placement: "top",
           duration: 5,
         });
-        hideEditDrawer();
-        fetchPartAnak();
+        fetchPartAnak(); // Refresh data setelah update
       }
     } catch (error) {
+      console.error("Error on edit data!");
       notification.error({
         message: "Error",
-        description: "Terjadi kesalahan saat mengubah supplier",
+        description: "Terjadi kesalahan saat mengubah part anak",
         placement: "top",
         duration: 3,
       });
+    } finally {
       hideEditDrawer();
-      fetchPartAnak();
+      router.refresh();
     }
   };
 
@@ -540,99 +586,8 @@ const PartAnak = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  name="nopartinduk"
-                  label="Nomor Part Anak"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Isi field ini terlebih dahulu!",
-                    },
-                  ]}
-                >
-                  <Input
-                    type="text"
-                    id="nopartinduk"
-                    placeholder="Masukkan nomor part anak"
-                    style={{
-                      minHeight: 39,
-                    }}
-                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
-                    required
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={16}>
-              <Col span={24}>
-                <Form.Item
-                  name="nopartindukupdate"
-                  label="Nomor Part Anak Update"
-                  rules={[
-                    {
-                      required: false,
-                      message: "Isi field ini terlebih dahulu!",
-                    },
-                  ]}
-                >
-                  <Input
-                    type="text"
-                    id="nopartindukupdate"
-                    placeholder="Masukkan nomor part anak update"
-                    style={{
-                      minHeight: 39,
-                    }}
-                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
-                    // required
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-          </Form>
-        </Drawer>
-
-        <Drawer
-          width={720}
-          onClose={() => hideEditDrawer()}
-          open={editDrawerOpen}
-          styles={{
-            body: {
-              paddingBottom: 80,
-            },
-          }}
-          extra={<p className="text-lg font-bold">Edit Supplier Impor</p>}
-          footer={
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                marginBottom: "10px",
-              }}
-            >
-              <Space>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="max-w-44 text-wrap rounded border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-600 hover:text-white hover:bg-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={() => editForm.submit()}
-                  type="button"
-                  className="min-w-36 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
-                >
-                  Simpan
-                </button>
-              </Space>
-            </div>
-          }
-        >
-          <Form layout="vertical" onFinish={handleEdit} form={editForm}>
-            <Row gutter={16}>
-              <Col span={24}>
-                <Form.Item
                   name="nopartanak"
-                  label="No Part"
+                  label="No Part Anak"
                   rules={[
                     {
                       required: false,
@@ -692,6 +647,31 @@ const PartAnak = () => {
                     type="text"
                     id="namapartanak"
                     placeholder="Masukkan nama part anak"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    required
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="nocmw"
+                  label="No CMW"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="text"
+                    id="nocmw"
+                    placeholder="Masukkan no cmw"
                     style={{
                       minHeight: 39,
                     }}
@@ -770,8 +750,8 @@ const PartAnak = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  name="supplier"
-                  label="Supplier"
+                  name="supplierlokal"
+                  label="Supplier Lokal"
                   rules={[
                     {
                       required: false,
@@ -782,13 +762,13 @@ const PartAnak = () => {
                   <Select
                     showSearch
                     className="w-full"
-                    placeholder="Pilih supplier"
+                    placeholder="Pilih supplier lokal"
                     style={{
                       minHeight: 39,
                     }}
                     allowClear
                     filterOption={(input, option) =>
-                      option.nama.toLowerCase().includes(input.toLowerCase())
+                      option.nama?.toLowerCase().includes(input.toLowerCase())
                     }
                     options={[
                       {
@@ -799,6 +779,349 @@ const PartAnak = () => {
                           nama: item.nama,
                         })),
                       },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="supplierimpor"
+                  label="Supplier Impor"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Select
+                    showSearch
+                    className="w-full"
+                    placeholder="Pilih supplier impor"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    allowClear
+                    filterOption={(input, option) =>
+                      option.nama?.toLowerCase().includes(input.toLowerCase())
+                    }
+                    options={[
+                      {
+                        label: "Supplier Impor",
+                        options: supplierImpor.map((item) => ({
+                          label: <span key={item.id_impor}>{item.nama}</span>,
+                          value: item.id_impor,
+                          nama: item.nama,
+                        })),
+                      },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="material"
+                  label="Material"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Select
+                    showSearch
+                    className="w-full"
+                    placeholder="Pilih material"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    allowClear
+                    filterOption={(input, option) =>
+                      option.nama.toLowerCase().includes(input.toLowerCase())
+                    }
+                    options={material.map((item) => ({
+                      label: <span key={item.id_material}>{item.nama}</span>,
+                      value: item.id_material,
+                      nama: item.nama,
+                    }))}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Drawer>
+
+        <Drawer
+          width={720}
+          onClose={() => hideEditDrawer()}
+          open={editDrawerOpen}
+          styles={{
+            body: {
+              paddingBottom: 80,
+            },
+          }}
+          extra={<p className="text-lg font-bold">Edit Supplier Impor</p>}
+          footer={
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: "10px",
+              }}
+            >
+              <Space>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="max-w-44 text-wrap rounded border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-600 hover:text-white hover:bg-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => editForm.submit()}
+                  type="button"
+                  className="min-w-36 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                >
+                  Simpan
+                </button>
+              </Space>
+            </div>
+          }
+        >
+          <Form layout="vertical" onFinish={handleEdit} form={editForm}>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="nopartanak"
+                  label="No Part Anak"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="text"
+                    id="nopartanak"
+                    placeholder="Masukkan no part anak"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="nopartanakupdate"
+                  label="No Part Anak Update"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="text"
+                    id="nopartanakupdate"
+                    placeholder="Masukkan no part anak update"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="namapartanak"
+                  label="Nama Part Anak"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="text"
+                    id="namapartanak"
+                    placeholder="Masukkan nama part anak"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    required
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="nocmw"
+                  label="No CMW"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="text"
+                    id="nocmw"
+                    placeholder="Masukkan no cmw"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    required
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="dwgsupplier"
+                  label="DWG Supplier"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Select
+                    showSearch
+                    className="w-full"
+                    placeholder="Pilih dwg supplier"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    allowClear
+                    filterOption={(input, option) =>
+                      option.nama.toLowerCase().includes(input.toLowerCase())
+                    }
+                    options={dwgSupplier.map((item) => ({
+                      label: <span key={item.id_dwg}>{item.nama}</span>,
+                      value: item.id_dwg,
+                      nama: item.nama,
+                    }))}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="maker"
+                  label="Maker"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Select
+                    showSearch
+                    className="w-full"
+                    placeholder="Pilih maker"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    allowClear
+                    filterOption={(input, option) =>
+                      option.nama.toLowerCase().includes(input.toLowerCase())
+                    }
+                    options={maker.map((item) => ({
+                      label: <span key={item.id_maker}>{item.nama}</span>,
+                      value: item.id_maker,
+                      nama: item.nama,
+                    }))}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="supplierlokal"
+                  label="Supplier Lokal"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Select
+                    showSearch
+                    className="w-full"
+                    placeholder="Pilih supplier lokal"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    allowClear
+                    filterOption={(input, option) =>
+                      option.nama?.toLowerCase().includes(input.toLowerCase())
+                    }
+                    options={[
+                      {
+                        label: "Supplier Lokal",
+                        options: supplierLokal.map((item) => ({
+                          label: <span key={item.id_lokal}>{item.nama}</span>,
+                          value: item.id_lokal,
+                          nama: item.nama,
+                        })),
+                      },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="supplierimpor"
+                  label="Supplier Impor"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Select
+                    showSearch
+                    className="w-full"
+                    placeholder="Pilih supplier impor"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    allowClear
+                    filterOption={(input, option) =>
+                      option.nama?.toLowerCase().includes(input.toLowerCase())
+                    }
+                    options={[
                       {
                         label: "Supplier Impor",
                         options: supplierImpor.map((item) => ({
@@ -928,8 +1251,11 @@ const PartAnak = () => {
                 <Descriptions.Item label="Maker" span={3}>
                   {selectedRow.maker || "-"}
                 </Descriptions.Item>
-                <Descriptions.Item label="Supplier" span={3}>
-                  {selectedRow.supplier || "-"}
+                <Descriptions.Item label="Supplier Lokal" span={3}>
+                  {selectedRow.namalokal || "-"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Supplier Impor" span={3}>
+                  {selectedRow.namaimpor || "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Material" span={3}>
                   {selectedRow.material || "-"}
