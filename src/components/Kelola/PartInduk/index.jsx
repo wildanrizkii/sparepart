@@ -51,12 +51,14 @@ const PartInduk = () => {
   const [partAnakData, setPartAnakData] = useState([]);
   const [selectedPart, setSelectedPart] = useState(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [selectedRowKeysEdit, setSelectedRowKeysEdit] = useState([]);
+  const [daftarIdPartAnak, setDaftarIdPartAnak] = useState([]);
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   const [searchTextPartAnak, setSearchTextpartAnak] = useState("");
+  const [selectedRowKeysEdit, setSelectedRowKeysEdit] = useState([]);
   const [filteredPartAnakData, setFilteredPartAnakData] = useState([]);
   const [temporarySelectedRows, setTemporarySelectedRows] = useState([]);
+  const [searchTextPartAnakEdit, setSearchTextpartAnakEdit] = useState("");
 
   const router = useRouter();
   const [form] = Form.useForm();
@@ -114,7 +116,6 @@ const PartInduk = () => {
             onClick={(e) => {
               e.stopPropagation();
               showEditDrawer(record);
-              console.log(record);
             }}
           >
             <EditOutlined />
@@ -127,7 +128,6 @@ const PartInduk = () => {
             title="Konfirmasi"
             description="Anda yakin ingin menghapus part induk ini?"
             onConfirm={(e) => {
-              console.log(record);
               handleDeletePartInduk(record.key);
               e.stopPropagation();
             }}
@@ -172,7 +172,7 @@ const PartInduk = () => {
   ];
 
   const showEditDrawer = async (values) => {
-    console.log(values.key);
+    // console.log(values.key);
     setIdPartInduk(values.key);
     setEditDrawerOpen(true);
 
@@ -188,9 +188,9 @@ const PartInduk = () => {
       })
       .filter((key) => key !== null);
 
-    console.log(selectedKeys);
+    // console.log(selectedKeys);
 
-    setSelectedRowKeysEdit(selectedKeys);
+    setDaftarIdPartAnak(selectedKeys);
 
     editForm.setFieldsValue({
       id_pi: values.key ?? null,
@@ -201,62 +201,22 @@ const PartInduk = () => {
 
   const onSelectChangeEdit = async (newSelectedRowKeys, selectedRows) => {
     try {
-      // Ambil semua id_pa yang sudah ada dalam tabel part_gabungan berdasarkan id_pi
-      const { data: existingData, error: fetchError } = await supabase
-        .from("part_gabungan")
-        .select("id_pa")
-        .eq("id_pi", idPartInduk);
-
-      if (fetchError) {
-        console.error("Error fetching part_gabungan data:", fetchError);
-        return;
-      }
-
-      const existingIds = existingData.map((item) => item.id_pa);
-
-      // Filter data yang baru dipilih tetapi belum ada di part_gabungan
       const newlySelectedRows = selectedRows.filter(
-        (row) => !existingIds.includes(row.key)
+        (row) => !selectedRowKeys.includes(row.key)
       );
 
-      // Filter id_pa yang tidak dipilih lagi dan harus dihapus dari part_gabungan
-      const unselectedKeys = existingIds.filter(
-        (id_pa) => !newSelectedRowKeys.includes(id_pa)
+      const unselectedKeys = selectedRowKeys.filter(
+        (key) => !newSelectedRowKeys.includes(key)
       );
 
-      // Tambahkan data baru ke part_gabungan
-      // for (const row of newlySelectedRows) {
-      //   const { error } = await supabase.from("part_gabungan").insert([
-      //     {
-      //       id_pi: idPartInduk,
-      //       id_pa: row.key,
-      //     },
-      //   ]);
-      //   if (error) {
-      //     console.error("Error inserting data into part_gabungan:", error);
-      //   }
-      // }
+      // console.log(newSelectedRowKeys);
+      // console.log(selectedRows);
+      // console.log(newlySelectedRows);
+      console.log(unselectedKeys);
 
-      // // Hapus data yang tidak dipilih dari part_gabungan
-      // for (const id_pa of unselectedKeys) {
-      //   const { error } = await supabase
-      //     .from("part_gabungan")
-      //     .delete()
-      //     .eq("id_pi", idPartInduk)
-      //     .eq("id_pa", id_pa);
-
-      //   if (error) {
-      //     console.error("Error deleting data from part_gabungan:", error);
-      //   }
-      // }
-      console.log(newSelectedRowKeys);
-      // Perbarui state selectedRowKeys
-      setSelectedRowKeysEdit(newSelectedRowKeys);
-
-      // Fetch ulang data setelah perubahan
-      await fetchPartInduk();
+      setDaftarIdPartAnak(newSelectedRowKeys);
     } catch (error) {
-      console.error("Error updating part_gabungan:", error);
+      console.error("Error updating draft laporan:", error);
     }
   };
 
@@ -297,9 +257,9 @@ const PartInduk = () => {
   };
 
   const rowSelectionEdit = {
-    selectedRowKeysEdit,
+    selectedRowKeys: daftarIdPartAnak,
     onChange: onSelectChangeEdit,
-    preserveSelectedRowKeysEdit: true,
+    preserveSelectedRowKeys: true,
   };
 
   const fetchPartInduk = async () => {
@@ -326,8 +286,6 @@ const PartInduk = () => {
         from += 1000;
         to += 1000;
       }
-
-      // console.log("Total Data Fetched:", allData.length);
 
       const partindukData = allData?.map((row, index) => ({
         key: row.id_pi,
@@ -390,6 +348,28 @@ const PartInduk = () => {
 
   const handleSearchPartAnak = (value) => {
     setSearchTextpartAnak(value);
+
+    if (!value) {
+      setFilteredPartAnakData(partAnakData);
+      return;
+    }
+
+    const filtered = partAnakData.filter((item) => {
+      const nomorPa = (item.nomor_pa || "-").toString();
+      const noCMW = (item.no_cmw || "-").toString();
+      const searchValue = value.toString();
+
+      return (
+        nomorPa.toLowerCase().includes(searchValue.toLowerCase()) ||
+        noCMW.toLowerCase().includes(searchValue.toLowerCase())
+      );
+    });
+
+    setFilteredPartAnakData(filtered);
+  };
+
+  const handleSearchPartAnakEdit = (value) => {
+    setSearchTextpartAnakEdit(value);
 
     if (!value) {
       setFilteredPartAnakData(partAnakData);
@@ -486,7 +466,6 @@ const PartInduk = () => {
   }, [partAnakData]);
 
   const handleSubmit = async (values) => {
-    console.log(values);
     try {
       const { data, error } = await supabase
         .from("part_induk")
@@ -503,7 +482,6 @@ const PartInduk = () => {
         .select("id_pi");
 
       const id_pi = data[0]?.id_pi;
-      console.log(id_pi);
       onClose();
       form.resetFields();
 
@@ -523,7 +501,7 @@ const PartInduk = () => {
         });
       }
 
-      console.log("Selected Rows:", temporarySelectedRows);
+      // console.log("Selected Rows:", temporarySelectedRows);
 
       const mappedRows = temporarySelectedRows.map((row) => ({
         id_pa: row.key,
@@ -536,8 +514,6 @@ const PartInduk = () => {
 
       if (error2) {
         console.error("Error inserting data into part_gabungan:", error2);
-      } else {
-        console.log("Data successfully inserted into part_gabungan", response);
       }
     } catch (error) {
       console.error("Error on submit data!");
@@ -553,7 +529,6 @@ const PartInduk = () => {
   };
 
   const handleEdit = async (values) => {
-    console.log(values);
     try {
       const { data, error } = await supabase
         .from("part_induk")
@@ -708,7 +683,7 @@ const PartInduk = () => {
                       suffix={suffix}
                     />
                     <Table
-                      rowSelection={rowSelectionEdit}
+                      rowSelection={rowSelection}
                       columns={columnsPartAnak}
                       dataSource={filteredPartAnakData}
                       pagination={{
@@ -806,7 +781,7 @@ const PartInduk = () => {
                 >
                   <Input
                     type="text"
-                    id="nopartinduk"
+                    id="nopartindukupdate"
                     placeholder="Masukkan no part induk update"
                     style={{
                       minHeight: 39,
@@ -816,11 +791,12 @@ const PartInduk = () => {
                 </Form.Item>
               </Col>
             </Row>
+
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  name="nopartindukupdate"
-                  label="No Part Induk Update"
+                  name="tablepartanak"
+                  label="Pilih Part Anak"
                   rules={[
                     {
                       required: false,
@@ -829,6 +805,13 @@ const PartInduk = () => {
                   ]}
                 >
                   <Flex gap="middle" vertical>
+                    <Input
+                      placeholder="Cari Nomor Part Anak atau No CMW"
+                      size="large"
+                      value={searchTextPartAnakEdit}
+                      onChange={(e) => handleSearchPartAnakEdit(e.target.value)}
+                      suffix={suffix}
+                    />
                     <Table
                       rowSelection={rowSelectionEdit}
                       columns={columnsPartAnak}
