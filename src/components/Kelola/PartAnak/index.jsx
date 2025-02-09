@@ -75,22 +75,25 @@ const PartAnak = () => {
   };
 
   const showEditDrawer = (values) => {
-    // console.log(values);
+    console.log(values);
     setIdPartAnak(values.key);
     setEditDrawerOpen(true);
 
     editForm.setFieldsValue({
-      id_pa: values.key,
-      namapartanak: values.part_name == "-" ? null : values.part_name,
-      dwgsupplier: values.dwg == "-" ? null : values.dwg,
-      nopartanak: values.nomor_pa == "-" ? null : values.nomor_pa,
-      nopartanakupdate:
-        values.nomor_pa_update == "-" ? null : values.nomor_pa_update,
-      supplier: values.supplier == null ? null : values.supplier,
-      supplierlokal: values.supplierlokal == null ? null : values.supplierlokal,
-      supplierimpor: values.supplierimpor == null ? null : values.supplierimpor,
-      material: values.material == null ? null : values.material,
-      maker: values.maker == null ? null : values.maker,
+      id_pa: values.key ?? null,
+      namapartanak: values.part_name ?? null,
+      dwgsupplier: values.dwg ?? null,
+      nopartanak: values.nomor_pa ?? null,
+      nopartanakupdate: values.nomor_pa_update ?? null,
+      supplier: values.supplier ?? null,
+      supplierlokal: values.supplierlokal ?? null,
+      supplierimpor: values.supplierimpor ?? null,
+      material: values.material ?? null,
+      maker: values.maker ?? null,
+      nocmw: values.no_cmw ?? null,
+      id_dwg: values.id_dwg ?? null,
+      id_maker: values.id_maker ?? null,
+      id_material: values.id_material ?? null,
     });
   };
 
@@ -237,6 +240,9 @@ const PartAnak = () => {
         no_cmw: row.no_cmw ?? "-",
         dwg: row.nama_dwg ?? "-",
         material: row.nama_material ?? "-",
+        id_maker: row.id_maker || null,
+        id_material: row.id_material || null,
+        id_dwg: row.id_dwg || null,
       }));
 
       setInitialData(partAnakData);
@@ -460,15 +466,27 @@ const PartAnak = () => {
       const { data, error } = await supabase
         .from("part_anak")
         .update({
-          no_part: values.nopartanak,
-          no_part_update: values.nopartanakupdate,
-          id_dwg: values.dwgsupplier,
-          id_material: values.material,
-          id_lokal: values.supplierlokal,
-          id_impor: values.supplierimpor,
-          id_maker: values.maker,
-          no_cmw: values.nocmw,
-          nama: values.namapartanak,
+          no_part: values.nopartanak === "-" ? null : values.nopartanak,
+          no_part_update:
+            values.nopartanakupdate === "-" ? null : values.nopartanakupdate,
+          id_dwg:
+            typeof values.dwgsupplier === "string"
+              ? values.id_dwg ?? null
+              : values.dwgsupplier ?? null,
+          id_material:
+            typeof values.material === "string"
+              ? values.id_material ?? null
+              : values.material ?? null,
+          id_lokal:
+            values.supplierlokal === "-" ? null : values.supplierlokal ?? null,
+          id_impor:
+            values.supplierimpor === "-" ? null : values.supplierimpor ?? null,
+          id_maker:
+            typeof values.maker === "string"
+              ? values.id_maker ?? null
+              : values.maker ?? null,
+          no_cmw: values.nocmw === "-" ? null : values.nocmw ?? null,
+          nama: values.namapartanak === "-" ? null : values.namapartanak,
         })
         .eq("id_pa", idPartAnak); // Pastikan id_pa sesuai dengan data yang diedit
 
@@ -490,7 +508,7 @@ const PartAnak = () => {
         fetchPartAnak(); // Refresh data setelah update
       }
     } catch (error) {
-      console.error("Error on edit data!");
+      console.error("Error on edit data!", error);
       notification.error({
         message: "Error",
         description: "Terjadi kesalahan saat mengubah part anak",
