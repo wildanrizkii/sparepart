@@ -166,8 +166,8 @@ const DetailPartInduk = ({ nomor }) => {
       dataIndex: "nomor_pa",
     },
     {
-      title: "No Part Anak Update",
-      dataIndex: "nomor_pa_update",
+      title: "No CMW",
+      dataIndex: "no_cmw",
     },
     {
       title: "Part Name",
@@ -192,7 +192,6 @@ const DetailPartInduk = ({ nomor }) => {
     }
 
     const filtered = initialData.filter((item) => {
-      // Pastikan nilai tidak null/undefined sebelum konversi ke string
       const nomorPi = (item.nomor_pa || "-").toString();
       const nomorPiUpdate = (item.nomor_pa_update || "-").toString();
       const searchValue = value.toString();
