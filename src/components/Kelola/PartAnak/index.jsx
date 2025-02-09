@@ -123,8 +123,8 @@ const PartAnak = () => {
       dataIndex: "nomor_pa",
     },
     {
-      title: "No Part Anak Update",
-      dataIndex: "nomor_pa_update",
+      title: "No CMW",
+      dataIndex: "no_cmw",
     },
     {
       title: "Part Name",
