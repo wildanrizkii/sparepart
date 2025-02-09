@@ -199,24 +199,75 @@ const PartInduk = () => {
     });
   };
 
+  // const onSelectChangeEdit = async (newSelectedRowKeys, selectedRows) => {
+  //   try {
+  //     const newlySelectedRows = selectedRows.filter(
+  //       (row) => !selectedRowKeys.includes(row.key)
+  //     );
+
+  //     const unselectedKeys = selectedRowKeys.filter(
+  //       (key) => !newSelectedRowKeys.includes(key)
+  //     );
+
+  //     // console.log(newSelectedRowKeys);
+  //     // console.log(selectedRows);
+  //     console.log(newlySelectedRows);
+  //     // console.log(unselectedKeys);
+
+  //     setDaftarIdPartAnak(newSelectedRowKeys);
+  //   } catch (error) {
+  //     console.error("Error updating draft laporan:", error);
+  //   }
+  // };
+
   const onSelectChangeEdit = async (newSelectedRowKeys, selectedRows) => {
     try {
-      const newlySelectedRows = selectedRows.filter(
-        (row) => !selectedRowKeys.includes(row.key)
+      // Simpan daftar ID part anak yang baru dipilih
+      const newPartAnakIds = newSelectedRowKeys;
+
+      // Ambil daftar ID part anak yang sebelumnya (dari state)
+      const oldPartAnakIds = daftarIdPartAnak;
+
+      // Identifikasi part anak yang dihapus
+      const deletedPartAnakIds = oldPartAnakIds.filter(
+        (id) => !newPartAnakIds.includes(id)
       );
 
-      const unselectedKeys = selectedRowKeys.filter(
-        (key) => !newSelectedRowKeys.includes(key)
+      // Identifikasi part anak yang baru ditambahkan
+      const addedPartAnakIds = newPartAnakIds.filter(
+        (id) => !oldPartAnakIds.includes(id)
       );
 
-      // console.log(newSelectedRowKeys);
-      // console.log(selectedRows);
-      // console.log(newlySelectedRows);
-      console.log(unselectedKeys);
+      // Delete records yang dihapus
+      if (deletedPartAnakIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from("part_gabungan")
+          .delete()
+          .eq("id_pi", idPartInduk)
+          .in("id_pa", deletedPartAnakIds);
 
+        if (deleteError) throw deleteError;
+      }
+
+      // Insert records yang baru
+      if (addedPartAnakIds.length > 0) {
+        const newRecords = addedPartAnakIds.map((id_pa) => ({
+          id_pi: idPartInduk,
+          id_pa: id_pa,
+        }));
+
+        const { error: insertError } = await supabase
+          .from("part_gabungan")
+          .insert(newRecords);
+
+        if (insertError) throw insertError;
+      }
+
+      // Update state dengan daftar part anak yang baru
       setDaftarIdPartAnak(newSelectedRowKeys);
     } catch (error) {
-      console.error("Error updating draft laporan:", error);
+      console.error("Error updating part_gabungan:", error);
+      // Tambahkan handling error sesuai kebutuhan (misalnya showing error message)
     }
   };
 
@@ -529,15 +580,19 @@ const PartInduk = () => {
   };
 
   const handleEdit = async (values) => {
+    // console.log(values);
     try {
       const { data, error } = await supabase
         .from("part_induk")
         .update({
-          no_part: values.nopartinduk === "-" ? null : values.nopartanak,
+          no_part:
+            values.nopartinduk === "-" ? null : values.nopartinduk ?? null,
           no_part_update:
-            values.nopartindukupdate === "-" ? null : values.nopartindukupdate,
+            values.nopartindukupdate === "-"
+              ? null
+              : values.nopartindukupdate ?? null,
         })
-        .eq("id_pi", values.key);
+        .eq("id_pi", idPartInduk);
 
       if (error) {
         console.error("Error updating data:", error);
