@@ -46,17 +46,30 @@ const PartInduk = () => {
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [initialData, setInitialData] = useState([]);
+  const [idPartInduk, setIdPartInduk] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
+  const [partAnakData, setPartAnakData] = useState([]);
   const [selectedPart, setSelectedPart] = useState(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRowKeysEdit, setSelectedRowKeysEdit] = useState([]);
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+  const [searchTextPartAnak, setSearchTextpartAnak] = useState("");
+  const [filteredPartAnakData, setFilteredPartAnakData] = useState([]);
+  const [temporarySelectedRows, setTemporarySelectedRows] = useState([]);
 
   const router = useRouter();
-  const [form] = useForm();
+  const [form] = Form.useForm();
   const [editForm] = Form.useForm();
 
   const onClose = () => {
     setOpen(false);
+    hideEditDrawer();
+  };
+
+  const hideEditDrawer = () => {
+    setEditDrawerOpen(false);
+    editForm.resetFields();
   };
 
   const showDrawer = () => {
@@ -87,7 +100,207 @@ const PartInduk = () => {
       title: "No Part Induk Update",
       dataIndex: "nomor_pi_update",
     },
+    {
+      title: "Edit",
+      dataIndex: "edit",
+      key: "Edit",
+      width: 128,
+      align: "center",
+      render: (_, record) => (
+        <div className="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+          <button
+            className="inline-block border-e p-3 text-gray-700 hover:bg-emerald-200 focus:relative transition-colors"
+            title="Ubah part induk"
+            onClick={(e) => {
+              e.stopPropagation();
+              showEditDrawer(record);
+              console.log(record);
+            }}
+          >
+            <EditOutlined />
+          </button>
+
+          <Popconfirm
+            placement="bottomRight"
+            cancelText="Batal"
+            okText="Hapus"
+            title="Konfirmasi"
+            description="Anda yakin ingin menghapus part induk ini?"
+            onConfirm={(e) => {
+              console.log(record);
+              handleDeletePartInduk(record.key);
+              e.stopPropagation();
+            }}
+            icon={
+              <QuestionCircleOutlined
+                style={{
+                  color: "red",
+                }}
+              />
+            }
+          >
+            <button
+              className="inline-block p-3 text-gray-700 hover:bg-red-200 focus:relative transition-colors"
+              title="Hapus part induk"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DeleteOutlined />
+            </button>
+          </Popconfirm>
+        </div>
+      ),
+    },
   ];
+
+  const columnsPartAnak = [
+    {
+      title: "No Part Anak",
+      dataIndex: "nomor_pa",
+    },
+    {
+      title: "No CMW",
+      dataIndex: "no_cmw",
+    },
+    {
+      title: "Part Name",
+      dataIndex: "nama",
+    },
+    {
+      title: "Maker",
+      dataIndex: "maker",
+    },
+  ];
+
+  const showEditDrawer = async (values) => {
+    console.log(values.key);
+    setIdPartInduk(values.key);
+    setEditDrawerOpen(true);
+
+    const { data, error } = await supabase
+      .from("part_gabungan")
+      .select("*")
+      .eq("id_pi", values.key);
+
+    const selectedKeys = data
+      .map((item) => {
+        const matchingRow = partAnakData.find((row) => row.key == item.id_pa);
+        return matchingRow ? matchingRow.key : null;
+      })
+      .filter((key) => key !== null);
+
+    console.log(selectedKeys);
+
+    setSelectedRowKeysEdit(selectedKeys);
+
+    editForm.setFieldsValue({
+      id_pi: values.key ?? null,
+      nopartinduk: values.nomor_pi ?? null,
+      nopartindukupdate: values.nomor_pi_update ?? null,
+    });
+  };
+
+  const onSelectChangeEdit = async (newSelectedRowKeys, selectedRows) => {
+    try {
+      // Ambil semua id_pa yang sudah ada dalam tabel part_gabungan berdasarkan id_pi
+      const { data: existingData, error: fetchError } = await supabase
+        .from("part_gabungan")
+        .select("id_pa")
+        .eq("id_pi", idPartInduk);
+
+      if (fetchError) {
+        console.error("Error fetching part_gabungan data:", fetchError);
+        return;
+      }
+
+      const existingIds = existingData.map((item) => item.id_pa);
+
+      // Filter data yang baru dipilih tetapi belum ada di part_gabungan
+      const newlySelectedRows = selectedRows.filter(
+        (row) => !existingIds.includes(row.key)
+      );
+
+      // Filter id_pa yang tidak dipilih lagi dan harus dihapus dari part_gabungan
+      const unselectedKeys = existingIds.filter(
+        (id_pa) => !newSelectedRowKeys.includes(id_pa)
+      );
+
+      // Tambahkan data baru ke part_gabungan
+      // for (const row of newlySelectedRows) {
+      //   const { error } = await supabase.from("part_gabungan").insert([
+      //     {
+      //       id_pi: idPartInduk,
+      //       id_pa: row.key,
+      //     },
+      //   ]);
+      //   if (error) {
+      //     console.error("Error inserting data into part_gabungan:", error);
+      //   }
+      // }
+
+      // // Hapus data yang tidak dipilih dari part_gabungan
+      // for (const id_pa of unselectedKeys) {
+      //   const { error } = await supabase
+      //     .from("part_gabungan")
+      //     .delete()
+      //     .eq("id_pi", idPartInduk)
+      //     .eq("id_pa", id_pa);
+
+      //   if (error) {
+      //     console.error("Error deleting data from part_gabungan:", error);
+      //   }
+      // }
+      console.log(newSelectedRowKeys);
+      // Perbarui state selectedRowKeys
+      setSelectedRowKeysEdit(newSelectedRowKeys);
+
+      // Fetch ulang data setelah perubahan
+      await fetchPartInduk();
+    } catch (error) {
+      console.error("Error updating part_gabungan:", error);
+    }
+  };
+
+  const onSelectChange = async (newSelectedRowKeys, selectedRows) => {
+    try {
+      // Menyaring item yang baru saja dipilih
+      const newlySelectedRows = selectedRows.filter(
+        (row) => !selectedRowKeys.includes(row.key)
+      );
+
+      // Menyaring item yang tidak dipilih
+      const unselectedKeys = selectedRowKeys.filter(
+        (key) => !newSelectedRowKeys.includes(key)
+      );
+
+      // Menambahkan item yang baru dipilih ke dalam state sementara
+      setTemporarySelectedRows((prevSelectedRows) => [
+        ...prevSelectedRows,
+        ...newlySelectedRows,
+      ]);
+
+      // Menghapus item yang tidak dipilih dari state sementara
+      setTemporarySelectedRows((prevSelectedRows) =>
+        prevSelectedRows.filter((row) => !unselectedKeys.includes(row.key))
+      );
+
+      // Update state selectedRowKeys dengan yang baru
+      setSelectedRowKeys(newSelectedRowKeys);
+    } catch (error) {
+      console.error("Error updating selected rows:", error);
+    }
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    preserveSelectedRowKeys: true,
+  };
+
+  const rowSelectionEdit = {
+    selectedRowKeysEdit,
+    onChange: onSelectChangeEdit,
+    preserveSelectedRowKeysEdit: true,
+  };
 
   const fetchPartInduk = async () => {
     try {
@@ -116,7 +329,7 @@ const PartInduk = () => {
 
       // console.log("Total Data Fetched:", allData.length);
 
-      const partindukData = allData.map((row, index) => ({
+      const partindukData = allData?.map((row, index) => ({
         key: row.id_pi,
         no: index + 1 + ".",
         nomor_pi: row.no_part ?? "-",
@@ -129,6 +342,109 @@ const PartInduk = () => {
       setInitialData([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPartAnak = async () => {
+    try {
+      let allData = [];
+      let from = 0;
+      let to = 999;
+
+      while (true) {
+        const { data, error } = await supabase
+          .from("view_part_anak_detail")
+          .select("*")
+          .range(from, to);
+
+        if (error) {
+          console.error("Error fetching data:", error);
+          break;
+        }
+
+        if (data.length === 0) break;
+
+        allData = [...allData, ...data];
+
+        from += 1000;
+        to += 1000;
+      }
+
+      const partanakData = allData.map((row, index) => ({
+        key: row.id_pa,
+        no: index + 1 + ".",
+        nomor_pa: row.no_part ?? "-",
+        nama: row.nama ?? "-",
+        no_cmw: row.no_cmw ?? "-",
+        maker: row.nama_maker ?? "-",
+      }));
+
+      setPartAnakData(partanakData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setPartAnakData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchPartAnak = (value) => {
+    setSearchTextpartAnak(value);
+
+    if (!value) {
+      setFilteredPartAnakData(partAnakData);
+      return;
+    }
+
+    const filtered = partAnakData.filter((item) => {
+      const nomorPa = (item.nomor_pa || "-").toString();
+      const noCMW = (item.no_cmw || "-").toString();
+      const searchValue = value.toString();
+
+      return (
+        nomorPa.toLowerCase().includes(searchValue.toLowerCase()) ||
+        noCMW.toLowerCase().includes(searchValue.toLowerCase())
+      );
+    });
+
+    setFilteredPartAnakData(filtered);
+  };
+
+  const handleDeletePartInduk = async (values) => {
+    try {
+      const { data, error } = await supabase
+        .from("part_induk")
+        .delete()
+        .eq("id_pi", values);
+
+      if (error) {
+        notification.error({
+          message: "Error",
+          description: "Terjadi kesalahan saat menghapus part induk",
+          placement: "top",
+          duration: 3,
+        });
+
+        fetchPartInduk();
+      } else {
+        notification.success({
+          message: "Berhasil",
+          description: "Part induk berhasil dihapus",
+          placement: "top",
+          duration: 5,
+        });
+
+        fetchPartInduk();
+      }
+    } catch (error) {
+      notification.error({
+        message: "Error",
+        description: "Terjadi kesalahan saat menghapus part induk",
+        placement: "top",
+        duration: 3,
+      });
+
+      fetchPartInduk();
     }
   };
 
@@ -156,31 +472,38 @@ const PartInduk = () => {
 
   useEffect(() => {
     setFilteredData(initialData);
+    setFilteredPartAnakData(partAnakData);
     fetchPartInduk();
+    fetchPartAnak();
   }, []);
 
   useEffect(() => {
     setFilteredData(initialData);
   }, [initialData]);
 
+  useEffect(() => {
+    setFilteredPartAnakData(partAnakData);
+  }, [partAnakData]);
+
   const handleSubmit = async (values) => {
     console.log(values);
     try {
-      const { data, error } = await supabase.from("part_induk").insert([
-        {
-          id_pi: await supabase
-            .from("part_induk")
-            .select("id_pi", { count: "exact", head: true })
-            .then((r) => r.count + 1),
-          no_part: values.nopartinduk,
-          no_part_update: values.nopartindukupdate,
-        },
-      ]);
-      if (error) {
-        console.error("Error inserting data:", error);
-      } else {
-        console.log("Insert successful:", data);
-      }
+      const { data, error } = await supabase
+        .from("part_induk")
+        .insert([
+          {
+            id_pi: await supabase
+              .from("part_induk")
+              .select("id_pi", { count: "exact", head: true })
+              .then((r) => r.count + 1),
+            no_part: values.nopartinduk,
+            no_part_update: values.nopartindukupdate,
+          },
+        ])
+        .select("id_pi");
+
+      const id_pi = data[0]?.id_pi;
+      console.log(id_pi);
       onClose();
       form.resetFields();
 
@@ -199,6 +522,23 @@ const PartInduk = () => {
           duration: 5,
         });
       }
+
+      console.log("Selected Rows:", temporarySelectedRows);
+
+      const mappedRows = temporarySelectedRows.map((row) => ({
+        id_pa: row.key,
+        id_pi: id_pi,
+      }));
+
+      const { data: response, error: error2 } = await supabase
+        .from("part_gabungan")
+        .insert(mappedRows); // Tanpa id_gabungan
+
+      if (error2) {
+        console.error("Error inserting data into part_gabungan:", error2);
+      } else {
+        console.log("Data successfully inserted into part_gabungan", response);
+      }
     } catch (error) {
       console.error("Error on submit data!");
       notification.error({
@@ -212,12 +552,54 @@ const PartInduk = () => {
     }
   };
 
+  const handleEdit = async (values) => {
+    console.log(values);
+    try {
+      const { data, error } = await supabase
+        .from("part_induk")
+        .update({
+          no_part: values.nopartinduk === "-" ? null : values.nopartanak,
+          no_part_update:
+            values.nopartindukupdate === "-" ? null : values.nopartindukupdate,
+        })
+        .eq("id_pi", values.key);
+
+      if (error) {
+        console.error("Error updating data:", error);
+        notification.error({
+          message: "Error",
+          description: "Terjadi kesalahan saat mengubah part induk",
+          placement: "top",
+          duration: 3,
+        });
+      } else {
+        notification.success({
+          message: "Berhasil",
+          description: "Part induk berhasil diperbarui",
+          placement: "top",
+          duration: 5,
+        });
+        fetchPartInduk();
+      }
+    } catch (error) {
+      console.error("Error on edit data!", error);
+      notification.error({
+        message: "Error",
+        description: "Terjadi kesalahan saat mengubah part induk",
+        placement: "top",
+        duration: 3,
+      });
+    } finally {
+      hideEditDrawer();
+      router.refresh();
+    }
+  };
+
   return (
     <div className="max-w-screen-xl">
       <div className="grid gap-4">
         <Drawer
-          // title="Buat Anggaran"
-          width={720}
+          width={960}
           onClose={onClose}
           open={open}
           styles={{
@@ -301,6 +683,169 @@ const PartInduk = () => {
                     className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
                     // required
                   />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="partanak"
+                  label="Pilih Part Anak"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Flex gap="middle" vertical>
+                    <Input
+                      placeholder="Cari Nomor Part Anak atau No CMW"
+                      size="large"
+                      value={searchTextPartAnak}
+                      onChange={(e) => handleSearchPartAnak(e.target.value)}
+                      suffix={suffix}
+                    />
+                    <Table
+                      rowSelection={rowSelectionEdit}
+                      columns={columnsPartAnak}
+                      dataSource={filteredPartAnakData}
+                      pagination={{
+                        position: ["bottomRight"],
+                        responsive: true,
+                      }}
+                      size="large"
+                      bordered={true}
+                      // onRow={(record) => ({
+                      //   onClick: (e) => handleRowClick(e, record),
+                      //   style: { cursor: "pointer" },
+                      // })}
+                      // loading={loading}
+                    />
+                  </Flex>
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Drawer>
+
+        <Drawer
+          width={720}
+          onClose={onClose}
+          open={editDrawerOpen}
+          styles={{
+            body: {
+              paddingBottom: 80,
+            },
+          }}
+          extra={<p className="text-lg font-bold">Edit Part Anak</p>}
+          footer={
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: "10px",
+              }}
+            >
+              <Space>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="max-w-44 text-wrap rounded border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-600 hover:text-white hover:bg-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => editForm.submit()}
+                  type="button"
+                  className="min-w-36 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                >
+                  Simpan
+                </button>
+              </Space>
+            </div>
+          }
+        >
+          <Form layout="vertical" onFinish={handleEdit} form={editForm}>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="nopartinduk"
+                  label="No Part Induk"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="text"
+                    id="nopartinduk"
+                    placeholder="Masukkan no part induk"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="nopartindukupdate"
+                  label="No Part Induk Update"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="text"
+                    id="nopartinduk"
+                    placeholder="Masukkan no part induk update"
+                    style={{
+                      minHeight: 39,
+                    }}
+                    className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="nopartindukupdate"
+                  label="No Part Induk Update"
+                  rules={[
+                    {
+                      required: false,
+                      message: "Isi field ini terlebih dahulu!",
+                    },
+                  ]}
+                >
+                  <Flex gap="middle" vertical>
+                    <Table
+                      rowSelection={rowSelectionEdit}
+                      columns={columnsPartAnak}
+                      dataSource={filteredPartAnakData}
+                      pagination={{
+                        position: ["bottomRight"],
+                        responsive: true,
+                      }}
+                      size="large"
+                      bordered={true}
+                      // onRow={(record) => ({
+                      //   onClick: (e) => handleRowClick(e, record),
+                      //   style: { cursor: "pointer" },
+                      // })}
+                      // loading={loading}
+                    />
+                  </Flex>
                 </Form.Item>
               </Col>
             </Row>

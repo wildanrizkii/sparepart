@@ -56,12 +56,13 @@ const DetailPartInduk = ({ nomor }) => {
         .eq("no_part", nomor);
 
       const dataLength = data.length;
-      setPartId(data[0].id_pi);
-      setNoPart(data[0].no_part);
-      setNoPartUpdate(data[0].no_part_update);
 
       if (dataLength === 0) {
         router.push("/");
+      } else {
+        setPartId(data[0].id_pi);
+        setNoPart(data[0].no_part);
+        setNoPartUpdate(data[0].no_part_update);
       }
     } catch (error) {
       console.error("Error fetching data: ", error);
