@@ -45,6 +45,7 @@ const PartInduk = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
   const [initialData, setInitialData] = useState([]);
   const [idPartInduk, setIdPartInduk] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
@@ -56,6 +57,7 @@ const PartInduk = () => {
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   const [searchTextPartAnak, setSearchTextpartAnak] = useState("");
   const [selectedRowKeysEdit, setSelectedRowKeysEdit] = useState([]);
+  const [tempSelectedPartAnak, setTempSelectedPartAnak] = useState([]);
   const [filteredPartAnakData, setFilteredPartAnakData] = useState([]);
   const [temporarySelectedRows, setTemporarySelectedRows] = useState([]);
   const [searchTextPartAnakEdit, setSearchTextpartAnakEdit] = useState("");
@@ -65,6 +67,7 @@ const PartInduk = () => {
   const [editForm] = Form.useForm();
 
   const onClose = () => {
+    setIsEditing(false);
     setOpen(false);
     hideEditDrawer();
   };
@@ -76,6 +79,16 @@ const PartInduk = () => {
 
   const showDrawer = () => {
     setOpen(true);
+  };
+
+  const handleStartEdit = () => {
+    setTempSelectedPartAnak([...daftarIdPartAnak]); // Salin data awal ke state sementara
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setTempSelectedPartAnak([...daftarIdPartAnak]); // Kembalikan ke data awal
+    setIsEditing(false);
   };
 
   const suffix = (
@@ -222,31 +235,90 @@ const PartInduk = () => {
 
   const onSelectChangeEdit = async (newSelectedRowKeys, selectedRows) => {
     try {
-      // Simpan daftar ID part anak yang baru dipilih
-      const newPartAnakIds = newSelectedRowKeys;
+      setTempSelectedPartAnak(newSelectedRowKeys);
+      //   // Simpan daftar ID part anak yang baru dipilih
+      //   const newPartAnakIds = newSelectedRowKeys;
 
-      // Ambil daftar ID part anak yang sebelumnya (dari state)
+      //   // Ambil daftar ID part anak yang sebelumnya (dari state)
+      //   const oldPartAnakIds = daftarIdPartAnak;
+
+      //   // Identifikasi part anak yang dihapus
+      //   const deletedPartAnakIds = oldPartAnakIds.filter(
+      //     (id) => !newPartAnakIds.includes(id)
+      //   );
+
+      //   // Identifikasi part anak yang baru ditambahkan
+      //   const addedPartAnakIds = newPartAnakIds.filter(
+      //     (id) => !oldPartAnakIds.includes(id)
+      //   );
+
+      //   // Delete records yang dihapus
+      //   if (deletedPartAnakIds.length > 0) {
+      //     const { error: deleteError } = await supabase
+      //       .from("part_gabungan")
+      //       .delete()
+      //       .eq("id_pi", idPartInduk)
+      //       .in("id_pa", deletedPartAnakIds);
+
+      //     if (deleteError) throw deleteError;
+      //   }
+
+      //   // Insert records yang baru
+      //   if (addedPartAnakIds.length > 0) {
+      //     const newRecords = addedPartAnakIds.map((id_pa) => ({
+      //       id_pi: idPartInduk,
+      //       id_pa: id_pa,
+      //     }));
+
+      //     const { error: insertError } = await supabase
+      //       .from("part_gabungan")
+      //       .insert(newRecords);
+
+      //     if (insertError) throw insertError;
+      //   }
+
+      //   // Update state dengan daftar part anak yang baru
+      //   setDaftarIdPartAnak(newSelectedRowKeys);
+    } catch (error) {
+      console.error("Error updating part_gabungan:", error);
+      // Tambahkan handling error sesuai kebutuhan (misalnya showing error message)
+    }
+  };
+
+  const handleSave = async () => {
+    try {
       const oldPartAnakIds = daftarIdPartAnak;
+      const newPartAnakIds = tempSelectedPartAnak;
 
-      // Identifikasi part anak yang dihapus
+      // console.log("Old IDs:", oldPartAnakIds);
+      // console.log("New IDs:", newPartAnakIds);
+
+      // Identifikasi perubahan
       const deletedPartAnakIds = oldPartAnakIds.filter(
         (id) => !newPartAnakIds.includes(id)
       );
 
-      // Identifikasi part anak yang baru ditambahkan
       const addedPartAnakIds = newPartAnakIds.filter(
         (id) => !oldPartAnakIds.includes(id)
       );
 
+      // console.log("Deleted IDs:", deletedPartAnakIds);
+      // console.log("Added IDs:", addedPartAnakIds);
+
       // Delete records yang dihapus
       if (deletedPartAnakIds.length > 0) {
-        const { error: deleteError } = await supabase
+        const { data: deleteData, error: deleteError } = await supabase
           .from("part_gabungan")
           .delete()
           .eq("id_pi", idPartInduk)
-          .in("id_pa", deletedPartAnakIds);
+          .in("id_pa", deletedPartAnakIds)
+          .select(); // Tambahkan .select() untuk melihat hasil delete
 
-        if (deleteError) throw deleteError;
+        if (deleteError) {
+          console.error("Delete error:", deleteError);
+          throw deleteError;
+        }
+        // console.log("Deleted data:", deleteData);
       }
 
       // Insert records yang baru
@@ -256,18 +328,26 @@ const PartInduk = () => {
           id_pa: id_pa,
         }));
 
-        const { error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await supabase
           .from("part_gabungan")
-          .insert(newRecords);
+          .insert(newRecords)
+          .select(); // Tambahkan .select() untuk melihat hasil insert
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Insert error:", insertError);
+          throw insertError;
+        }
+        // console.log("Inserted data:", insertData);
       }
 
-      // Update state dengan daftar part anak yang baru
-      setDaftarIdPartAnak(newSelectedRowKeys);
+      // Update state utama setelah berhasil simpan
+      setDaftarIdPartAnak(tempSelectedPartAnak);
+      setIsEditing(false);
     } catch (error) {
       console.error("Error updating part_gabungan:", error);
-      // Tambahkan handling error sesuai kebutuhan (misalnya showing error message)
+    } finally {
+      fetchPartInduk();
+      setIsEditing(false);
     }
   };
 
@@ -307,11 +387,11 @@ const PartInduk = () => {
     preserveSelectedRowKeys: true,
   };
 
-  const rowSelectionEdit = {
-    selectedRowKeys: daftarIdPartAnak,
-    onChange: onSelectChangeEdit,
-    preserveSelectedRowKeys: true,
-  };
+  // const rowSelectionEdit = {
+  //   selectedRowKeys: daftarIdPartAnak,
+  //   onChange: onSelectChangeEdit,
+  //   preserveSelectedRowKeys: true,
+  // };
 
   const fetchPartInduk = async () => {
     try {
@@ -535,6 +615,7 @@ const PartInduk = () => {
       const id_pi = data[0]?.id_pi;
       onClose();
       form.resetFields();
+      setIsEditing(false);
 
       if (error) {
         notification.error({
@@ -543,6 +624,7 @@ const PartInduk = () => {
           placement: "top",
           duration: 3,
         });
+        fetchPartInduk();
       } else {
         notification.success({
           message: "Berhasil",
@@ -550,6 +632,7 @@ const PartInduk = () => {
           placement: "top",
           duration: 5,
         });
+        fetchPartInduk();
       }
 
       // console.log("Selected Rows:", temporarySelectedRows);
@@ -580,6 +663,7 @@ const PartInduk = () => {
   };
 
   const handleEdit = async (values) => {
+    handleSave();
     // console.log(values);
     try {
       const { data, error } = await supabase
@@ -778,22 +862,39 @@ const PartInduk = () => {
                 marginBottom: "10px",
               }}
             >
-              <Space>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="max-w-44 text-wrap rounded border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-600 hover:text-white hover:bg-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={() => editForm.submit()}
-                  type="button"
-                  className="min-w-36 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
-                >
-                  Simpan
-                </button>
-              </Space>
+              {isEditing ? (
+                <Space>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="max-w-44 text-wrap rounded border border-emerald-600 bg-white px-4 py-2 text-sm font-medium text-emerald-600 hover:text-white hover:bg-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={() => editForm.submit()}
+                    type="button"
+                    className="min-w-36 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                  >
+                    Simpan
+                  </button>
+                </Space>
+              ) : (
+                <div className="flex gap-4">
+                  <Space>
+                    Klik tombol "Mode edit" untuk masuk ke mode edit data!
+                  </Space>
+                  <Space>
+                    <button
+                      onClick={handleStartEdit}
+                      type="button"
+                      className="min-w-36 text-wrap rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-emerald-600 focus:outline-none focus:ring active:text-emerald-500 transition-colors"
+                    >
+                      Mode edit
+                    </button>
+                  </Space>
+                </div>
+              )}
             </div>
           }
         >
@@ -818,6 +919,7 @@ const PartInduk = () => {
                       minHeight: 39,
                     }}
                     className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    disabled={isEditing ? false : true}
                   />
                 </Form.Item>
               </Col>
@@ -842,6 +944,7 @@ const PartInduk = () => {
                       minHeight: 39,
                     }}
                     className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                    disabled={isEditing ? false : true}
                   />
                 </Form.Item>
               </Col>
@@ -868,7 +971,13 @@ const PartInduk = () => {
                       suffix={suffix}
                     />
                     <Table
-                      rowSelection={rowSelectionEdit}
+                      rowSelection={{
+                        selectedRowKeys: isEditing
+                          ? tempSelectedPartAnak
+                          : daftarIdPartAnak,
+                        onChange: onSelectChangeEdit,
+                        preserveSelectedRowKeys: true,
+                      }}
                       columns={columnsPartAnak}
                       dataSource={filteredPartAnakData}
                       pagination={{
