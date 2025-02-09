@@ -446,7 +446,7 @@ const Dashboard = () => {
         }
 
         if (data.length > 0) {
-          console.log("Data sudah ada pada draft!");
+          // console.log("Data sudah ada pada draft!");
         } else {
           const { data, error } = await supabase.from("draft").insert([
             {
@@ -621,13 +621,18 @@ const Dashboard = () => {
           <div className="text-2xl font-medium">
             <p>Daftar Part Induk</p>
           </div>
-          <Badge count={cartItems?.length}>
-            <FileDoneOutlined
-              style={{ fontSize: "24px" }}
-              onClick={toggleDraftVisibility}
-              className="cursor-pointer"
-            />
-          </Badge>
+          <div
+            className="flex gap-2 underline cursor-pointer"
+            onClick={toggleDraftVisibility}
+          >
+            {isDraftVisible ? <h1>Hide draft</h1> : <h1>Show draft</h1>}
+            <Badge count={cartItems?.length}>
+              <FileDoneOutlined
+                style={{ fontSize: "24px" }}
+                className="cursor-pointer"
+              />
+            </Badge>
+          </div>
         </Flex>
 
         <div>
