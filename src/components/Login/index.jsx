@@ -1,15 +1,51 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { Image, Input, Form, Row, Col, notification } from "antd";
+import {
+  UserOutlined,
+  EyeOutlined,
+  EyeInvisibleOutlined,
+  LockOutlined,
+} from "@ant-design/icons";
+import { signIn, useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle login logic here
+  let { data: session } = useSession();
+
+  const handleSubmit = async () => {
+    try {
+      if (username.length >= 4 && password.length >= 4) {
+        const response = await signIn("credentials", {
+          username: username,
+          password: password,
+          redirect: false,
+        });
+
+        if (response?.error) {
+          notification.error({
+            message: "Error",
+            description: "Username atau password yang Anda masukan salah!",
+            placement: "top",
+            duration: 3,
+          });
+        }
+      } else {
+        notification.error({
+          message: "Error",
+          description: "Harap isi username dan password dengan benar!",
+          placement: "top",
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      console.error("Error on routes", error);
+    }
   };
 
   useEffect(() => {
@@ -19,107 +55,118 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center p-4 font-mono">
-      <div className="w-full max-w-md">
-        {/* Card container with glass effect */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 space-y-8">
-          {/* Header */}
-          <div className="text-center">
-            <div className="bg-indigo-600 w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-              <Lock className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900">Welcome Back!</h2>
-            <p className="mt-2 text-gray-600">Please sign in to continue</p>
-          </div>
+      {!session ? (
+        <div className="w-full max-w-md">
+          {/* Card container with glass effect */}
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <Image
+                src="/images/logo-cmw.png"
+                width={240}
+                height={80}
+                preview={false}
+              />
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 block ml-1">
-                Username
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg bg-white/50 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-all duration-200"
-                  placeholder="Username"
-                  required
-                />
-              </div>
+              {/* <h2 className="mt-4 text-2xl font-bold text-gray-900">
+              Welcome Back!
+            </h2> */}
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 block ml-1">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg bg-white/50 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-all duration-200"
-                  placeholder="Password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showPassword ? (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Remember Me & Forgot Password
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-600"
-                />
-                <label className="ml-2 text-sm text-gray-600">
-                  Remember me
-                </label>
-              </div>
+            {/* Form */}
+            <Form layout="vertical" onFinish={handleSubmit}>
+              <Row gutter={16}>
+                <Col span={24}>
+                  <Form.Item
+                    name="username"
+                    label="Username"
+                    rules={[
+                      {
+                        required: false,
+                        message: "Isi field ini terlebih dahulu!",
+                      },
+                    ]}
+                  >
+                    <Input
+                      type="text"
+                      id="username"
+                      placeholder="Username"
+                      style={{
+                        minHeight: 45,
+                      }}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                      prefix={
+                        <span
+                          style={{ fontSize: 18, width: 20, color: "#ababab" }}
+                        >
+                          <UserOutlined />
+                        </span>
+                      }
+                      size="large"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={16}>
+                <Col span={24}>
+                  <Form.Item
+                    name="password"
+                    label="Password"
+                    rules={[
+                      {
+                        required: false,
+                        message: "Isi field ini terlebih dahulu!",
+                      },
+                    ]}
+                  >
+                    <Input.Password
+                      type="password"
+                      id="password"
+                      placeholder="Password"
+                      onChange={(e) => setPassword(e.target.value)}
+                      style={{
+                        minHeight: 45,
+                      }}
+                      className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
+                      prefix={
+                        <span
+                          style={{ fontSize: 18, width: 20, color: "#ababab" }}
+                        >
+                          <LockOutlined />
+                        </span>
+                      }
+                      iconRender={(visible) =>
+                        visible ? (
+                          <EyeOutlined style={{ fontSize: 18 }} />
+                        ) : (
+                          <EyeInvisibleOutlined style={{ fontSize: 18 }} />
+                        )
+                      }
+                      size="large"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
               <button
-                type="button"
-                className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+                type="submit"
+                className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200"
               >
-                Forgot Password?
+                Sign In
               </button>
-            </div> */}
+            </Form>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 transition-colors duration-200"
-            >
-              Sign In
-            </button>
-          </form>
-
-          {/* <p className="text-center text-sm text-gray-600">
+            {/* <p className="text-center text-sm text-gray-600">
             Don't have an account?{" "}
             <button className="text-indigo-600 hover:text-indigo-500 font-medium">
               Sign up now
             </button>
           </p> */}
+          </div>
         </div>
-      </div>
+      ) : (
+        redirect("/")
+      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React from "react";
 import "./globals.css";
+import SessionWrapper from "@/components/SessionWrapper";
 
 export const metadata = {
   title: "CMW",
@@ -8,8 +9,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body suppressHydrationWarning={true}>{children}</body>
-    </html>
+    <SessionWrapper>
+      <html lang="en">
+        <body suppressHydrationWarning={true}>{children}</body>
+      </html>
+    </SessionWrapper>
   );
 }

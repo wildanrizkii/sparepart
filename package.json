@@ -13,6 +13,7 @@
     "@vercel/postgres": "^0.10.0",
     "antd": "^5.22.5",
     "axios": "^1.7.9",
+    "bcryptjs": "^2.4.3",
     "dayjs": "^1.11.13",
     "exceljs": "^4.4.0",
     "lucide-react": "^0.468.0",

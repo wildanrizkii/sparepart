@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 // import { useSession } from "next-auth/react";
 import { Poppins } from "next/font/google";
 import dayjs from "dayjs";
+import { signOut } from "next-auth/react";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -52,6 +53,7 @@ import {
 import { redirect, useRouter } from "next/navigation";
 import FloatingButton from "../FloatingButton/ScrollToTop";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const { Header, Sider, Content } = Layout;
 
@@ -74,10 +76,11 @@ const SideNavigation = ({ menu, submenu, konten }) => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  //   const { data: session } = useSession();
-  const { data: session } = "";
+  const { data: session } = useSession();
   let key1 = { menu };
   let key2 = { submenu };
+
+  // console.log(session?.user);
 
   useEffect(() => {
     document.body.classList.add("loaded");
@@ -126,7 +129,7 @@ const SideNavigation = ({ menu, submenu, konten }) => {
               className="mt-8 mb-8"
             >
               <Image
-                src="/logo-cmw.png"
+                src="/images/logo-cmw.png"
                 width={collapsed ? 60 : 180}
                 height={collapsed ? 60 : 60}
                 preview={false}
@@ -256,17 +259,22 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                               >
                                 <div className="flex justify-center mb-4">
                                   {session?.user?.image ? (
+                                    // <Avatar
+                                    //   shape="square"
+                                    //   size={{
+                                    //     xs: "50px",
+                                    //     sm: "60px",
+                                    //     md: "70px",
+                                    //     lg: "80px",
+                                    //     xl: "90px",
+                                    //     xxl: "100px",
+                                    //   }}
+                                    //   src={session.user.image}
+                                    // />
                                     <Avatar
                                       shape="square"
-                                      size={{
-                                        xs: "50px",
-                                        sm: "60px",
-                                        md: "70px",
-                                        lg: "80px",
-                                        xl: "90px",
-                                        xxl: "100px",
-                                      }}
-                                      src={session.user.image}
+                                      size="large"
+                                      icon={<UserOutlined />}
                                     />
                                   ) : (
                                     <Avatar
@@ -282,7 +290,11 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <h1 className="font-bold">Nama</h1>
-                                    <h1>{nama ? nama : "Loading..."}</h1>
+                                    <h1>
+                                      {session?.user?.name
+                                        ? session?.user?.name
+                                        : "Loading..."}
+                                    </h1>
                                   </div>
 
                                   <div
@@ -297,7 +309,11 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                                     >
                                       Email
                                     </h1>
-                                    <h1>{email ? email : "Loading..."}</h1>
+                                    <h1>
+                                      {session?.user?.email
+                                        ? session?.user?.email
+                                        : "Loading..."}
+                                    </h1>
                                   </div>
 
                                   <div className="flex gap-2 mt-2">
@@ -314,7 +330,7 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                                     </Link>
                                     <div
                                       className="flex shadow-md justify-center items-center p-4 gap-1 text-white bg-red-500 hover:bg-red-600 rounded-md cursor-pointer transition-colors"
-                                      //   onClick={() => signOut()}
+                                      onClick={() => signOut()}
                                     >
                                       <LogoutOutlined className="mb-0.5" />
                                     </div>
@@ -398,23 +414,35 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                     );
                   }}
                 >
-                  {session?.user?.image ? (
+                  {session?.user ? (
                     <div className="flex items-center justify-center gap-3 cursor-pointer">
                       <div className="hidden sm:block lg:text-lg text-gray-700">
-                        <h1>{nama ? nama : "..."}</h1>
+                        <h1>
+                          {session?.user?.name ? session?.user?.name : "..."}
+                        </h1>
                       </div>
-                      <Badge dot={isDot}>
+                      {/* <Badge dot={isDot}>
                         <Avatar
                           shape="square"
                           size="large"
                           src={session.user.image}
+                        />
+                      </Badge> */}
+                      <Badge dot={isDot}>
+                        <Avatar
+                          shape="square"
+                          size="large"
+                          icon={<UserOutlined />}
+                          style={{ cursor: "pointer" }}
                         />
                       </Badge>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-3 cursor-pointer">
                       <div className="hidden sm:block lg:text-lg text-gray-700">
-                        <h1>{nama ? nama : "..."}</h1>
+                        <h1>
+                          {session?.user?.name ? session?.user?.name : "..."}
+                        </h1>
                       </div>
                       <Badge dot={isDot}>
                         <Avatar

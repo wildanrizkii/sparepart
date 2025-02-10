@@ -5,17 +5,17 @@ import { getToken } from 'next-auth/jwt';
 const secret = process.env.NEXTAUTH_SECRET;
 
 export async function middleware(req: NextRequest) {
-    const token = await getToken({ req, secret });
-    const { pathname } = req.nextUrl;
+  const token = await getToken({ req, secret });
+  const { pathname } = req.nextUrl;
+  
+  if (!token && pathname !== '/login') {
+    const loginUrl = new URL('/login', req.url);
+    return NextResponse.redirect(loginUrl);
+  }
 
-    // if (!token && pathname !== '/login' && pathname !== '/register') {
-    //     const loginUrl = new URL('/login', req.url);
-    //     return NextResponse.redirect(loginUrl);
-    // }
-
-    return NextResponse.next();
+  return NextResponse.next();
 }
 
 export const config = {
-    matcher: ['/((?!_next|api|static|favicon.ico|images/).*)'],
+  matcher: ['/((?!_next|api|static|favicon.ico|images/).*)'],
 };
