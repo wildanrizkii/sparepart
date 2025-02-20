@@ -614,7 +614,7 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="max-w-screen-xl mx-auto p-4">
+    <div className="max-w-screen-xl mx-auto">
       <div className="space-y-4">
         {/* Header Section */}
         <Flex justify="space-between" align="center">

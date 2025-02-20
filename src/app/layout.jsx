@@ -1,5 +1,4 @@
 import React from "react";
-import Head from "next/head";
 import "./globals.css";
 import SessionWrapper from "@/components/SessionWrapper";
 
@@ -8,17 +7,18 @@ export const metadata = {
   description: "Cipta Mandiri Wirasakti",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({ children }) {
   return (
     <SessionWrapper>
-      <html lang="en">
-        <Head>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-          />
-        </Head>
-        <body suppressHydrationWarning={true}>{children}</body>
+      <html lang="en" suppressHydrationWarning>
+        <body>{children}</body>
       </html>
     </SessionWrapper>
   );

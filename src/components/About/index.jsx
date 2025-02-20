@@ -5,7 +5,12 @@ const About = () => {
   return (
     <div className="relative grid gap-14 justify-center pt-44 text-center">
       <div>
-        <Image src={"/images/logo-cmw.png"} width={360} height={300} />
+        <Image
+          src={"/images/logo-cmw.png"}
+          width={360}
+          height={300}
+          alt="logo-cmw"
+        />
       </div>
       <div className="grid gap-6">
         <div className="grid gap-2 justify-center text-center">

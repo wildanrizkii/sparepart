@@ -301,14 +301,7 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                                     className="cursor-default"
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    <h1
-                                      target="_blank"
-                                      rel=""
-                                      href=""
-                                      className="font-bold"
-                                    >
-                                      Email
-                                    </h1>
+                                    <h1 className="font-bold">Email</h1>
                                     <h1>
                                       {session?.user?.email
                                         ? session?.user?.email
