@@ -384,11 +384,13 @@ const PartAnak = () => {
     const filtered = initialData.filter((item) => {
       const nomorPa = (item.nomor_pa || "-").toString();
       const nomorPaUpdate = (item.nomor_pa_update || "-").toString();
+      const nomorCMW = (item.no_cmw || "-").toString();
       const searchValue = value.toString();
 
       return (
         nomorPa.toLowerCase().includes(searchValue.toLowerCase()) ||
-        nomorPaUpdate.toLowerCase().includes(searchValue.toLowerCase())
+        nomorPaUpdate.toLowerCase().includes(searchValue.toLowerCase()) ||
+        nomorCMW.toLowerCase().includes(searchValue.toLowerCase())
       );
     });
 
@@ -1203,7 +1205,7 @@ const PartAnak = () => {
 
         <div>
           <Input
-            placeholder="Cari Nomor Part Anak"
+            placeholder="Cari No. Part Anak atau No. CMW"
             size="large"
             value={searchText}
             onChange={(e) => handleSearch(e.target.value)}

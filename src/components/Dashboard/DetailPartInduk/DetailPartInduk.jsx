@@ -195,11 +195,13 @@ const DetailPartInduk = ({ nomor }) => {
     const filtered = initialData.filter((item) => {
       const nomorPi = (item.nomor_pa || "-").toString();
       const nomorPiUpdate = (item.nomor_pa_update || "-").toString();
+      const noCMW = (item.no_cmw || "-").toString();
       const searchValue = value.toString();
 
       return (
         nomorPi.toLowerCase().includes(searchValue.toLowerCase()) ||
-        nomorPiUpdate.toLowerCase().includes(searchValue.toLowerCase())
+        nomorPiUpdate.toLowerCase().includes(searchValue.toLowerCase()) ||
+        noCMW.toLowerCase().includes(searchValue.toLowerCase())
       );
     });
 
@@ -320,7 +322,7 @@ const DetailPartInduk = ({ nomor }) => {
 
         <div>
           <Input
-            placeholder="Cari no part anak"
+            placeholder="Cari No. Part Anak atau No. CMW"
             size="large"
             value={searchText}
             onChange={(e) => handleSearch(e.target.value)}

@@ -390,9 +390,9 @@ const SideNavigation = ({ menu, submenu, konten }) => {
 
                                   {notificationCount == 0 &&
                                   fiturAnggaranCount == 0 ? (
-                                    <div className="flex rounded-lg bg-transparent mb-2 px-4 py-4 items-center justify-center gap-4 text-black relative">
+                                    <div className="flex rounded-lg bg-transparent mb-2 h-52 py-4 items-center justify-center gap-4 text-black relative">
                                       <div className="grid text-sm gap-2">
-                                        <div className="text-wrap px-8 md:px-10">
+                                        <div className="text-wrap px-7 md:px-11">
                                           Tidak ada notifikasi
                                         </div>
                                       </div>
