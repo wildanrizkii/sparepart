@@ -838,6 +838,7 @@ const Dashboard = () => {
                   style: { cursor: "pointer" },
                 })}
                 loading={loading}
+                scroll={{ x: "max-content" }}
               />
             </Flex>
           </div>
