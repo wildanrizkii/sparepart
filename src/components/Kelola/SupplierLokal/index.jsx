@@ -312,7 +312,7 @@ const SupplierLokal = () => {
 
   return (
     <div className="max-w-screen-xl">
-      <div className="grid gap-4">
+      <div className="space-y-4">
         <Drawer
           width={720}
           onClose={onClose}
@@ -483,6 +483,7 @@ const SupplierLokal = () => {
             //     style: { cursor: "pointer" },
             //   })}
             loading={loading}
+            scroll={{ x: "max-content" }}
           />
         </Flex>
       </div>

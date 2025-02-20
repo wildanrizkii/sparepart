@@ -312,7 +312,7 @@ const Supplier = () => {
 
   return (
     <div className="max-w-screen-xl">
-      <div className="grid gap-4">
+      <div className="space-y-4">
         <Drawer
           width={720}
           onClose={onClose}
@@ -444,6 +444,7 @@ const Supplier = () => {
             </Row>
           </Form>
         </Drawer>
+
         <div className="grid gap-4">
           <h1 className="text-2xl font-medium col-span-1">
             Kelola DWG Supplier
@@ -483,6 +484,7 @@ const Supplier = () => {
             //     style: { cursor: "pointer" },
             //   })}
             loading={loading}
+            scroll={{ x: "max-content" }}
           />
         </Flex>
       </div>

@@ -314,7 +314,7 @@ const Maker = () => {
 
   return (
     <div className="max-w-screen-xl">
-      <div className="grid gap-4">
+      <div className="space-y-4">
         <Drawer
           width={720}
           onClose={onClose}
@@ -446,6 +446,7 @@ const Maker = () => {
             </Row>
           </Form>
         </Drawer>
+
         <div className="grid gap-4">
           <h1 className="text-2xl font-medium col-span-1">Kelola Maker</h1>
           <div className="grid gap-4">
@@ -468,6 +469,7 @@ const Maker = () => {
             suffix={suffix}
           />
         </div>
+
         <Flex gap="middle" vertical>
           <Table
             columns={columns}
@@ -484,6 +486,7 @@ const Maker = () => {
             //   style: { cursor: "pointer" },
             // })}
             loading={loading}
+            scroll={{ x: "max-content" }}
           />
         </Flex>
       </div>

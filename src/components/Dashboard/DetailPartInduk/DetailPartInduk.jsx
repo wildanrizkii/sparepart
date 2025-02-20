@@ -305,7 +305,7 @@ const DetailPartInduk = ({ nomor }) => {
 
   return (
     <div className="max-w-screen-xl">
-      <div className="grid gap-4">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="text-2xl font-medium">
             <p>Informasi Part Induk</p>
@@ -329,13 +329,14 @@ const DetailPartInduk = ({ nomor }) => {
           />
         </div>
 
-        <div className="flex gap-8 mb-2 p-4 bg-white rounded-md border border-gray-200 items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 mb-2 p-4 bg-white rounded-md border border-gray-200 items-center">
           <div className="grid">
             <div className="text-sm text-gray-500">Nomor Part Induk</div>
             <div className="font-bold text-lg text-gray-800">
               {noPart || "-"}
             </div>
           </div>
+
           <div className="grid">
             <div className="text-sm text-gray-500">Nomor Part Induk Update</div>
             <div className="font-bold text-lg text-gray-800">
@@ -343,36 +344,37 @@ const DetailPartInduk = ({ nomor }) => {
             </div>
           </div>
 
-          {loadingButton ? (
-            <Button
-              loading
-              className="ml-auto px-4 py-2 min-h-[42px] text-white bg-gray-200 hover:bg-gray-200 rounded-md shadow-md flex items-center"
-              disabled // Nonaktifkan tombol saat loading
-            >
-              Loading...
-            </Button>
-          ) : statusButton ? (
-            <Button
-              className="ml-auto px-4 py-2 min-h-[42px] text-white bg-red-600 hover:bg-red-700 rounded-md shadow-md flex items-center"
-              onClick={() => handleHapus(noPart)} // Pastikan router diimpor jika menggunakan Next.js
-            >
-              - Hapus dari draft
-            </Button>
-          ) : (
-            <Button
-              className="ml-auto px-4 py-2 min-h-[42px] text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center"
-              onClick={() => handleTambah(partId, noPart, noPartUpdate)} // Pastikan router diimpor jika menggunakan Next.js
-            >
-              + Tambahkan ke dalam draft
-            </Button>
-          )}
+          <div className="w-full sm:w-auto sm:ml-auto">
+            {loadingButton ? (
+              <Button
+                loading
+                className="w-full sm:w-auto px-4 py-2 min-h-[42px] text-white bg-gray-200 hover:bg-gray-200 rounded-md shadow-md flex items-center justify-center"
+                disabled
+              >
+                Loading...
+              </Button>
+            ) : statusButton ? (
+              <Button
+                className="w-full sm:w-auto px-4 py-2 min-h-[42px] text-white bg-red-600 hover:bg-red-700 rounded-md shadow-md flex items-center justify-center"
+                onClick={() => handleHapus(noPart)}
+              >
+                - Hapus dari draft
+              </Button>
+            ) : (
+              <Button
+                className="w-full sm:w-auto px-4 py-2 min-h-[42px] text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-md flex items-center justify-center"
+                onClick={() => handleTambah(partId, noPart, noPartUpdate)}
+              >
+                + Tambahkan ke draft
+              </Button>
+            )}
+          </div>
         </div>
 
-        <Flex gap="large">
-          {/* Table Section */}
-          <div style={{ flex: 2 }}>
-            <Flex gap="middle" vertical>
-              {/* <Flex align="center" gap="middle">
+        {/* Table Section */}
+
+        <Flex gap="middle" vertical>
+          {/* <Flex align="center" gap="middle">
                 <Button
                   type="primary"
                   onClick={start}
@@ -385,75 +387,74 @@ const DetailPartInduk = ({ nomor }) => {
                   ? `Selected ${selectedRowKeys.length} items`
                   : null}
               </Flex> */}
-              <Table
-                // rowSelection={rowSelection}
-                columns={columns}
-                dataSource={filteredData}
-                pagination={{
-                  position: ["bottomRight"],
-                  responsive: true,
-                }}
-                size="large"
-                bordered={true}
-                onRow={(record) => ({
-                  onClick: (e) => handleRowClick(record),
-                  style: { cursor: "pointer" },
-                })}
-                loading={loading}
-              />
-              <Modal
-                title="Detail Part Anak"
-                open={isModalVisible}
-                onCancel={() => setIsModalVisible(false)}
-                width={600}
-                footer={[
-                  <Button key="close" onClick={() => setIsModalVisible(false)}>
-                    Close
-                  </Button>,
-                ]}
-              >
-                {selectedRow && (
-                  <Descriptions
-                    layout="vertical"
-                    bordered
-                    column={{ xs: 1, sm: 2, md: 2 }}
-                    style={{
-                      marginTop: "20px",
-                      backgroundColor: "white",
-                      padding: "20px",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <Descriptions.Item label="No Part Anak" span={3}>
-                      <strong>{selectedRow.nomor_pa || "-"}</strong>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="No Part Anak Update" span={3}>
-                      <strong>{selectedRow.nomor_pa_update || "-"}</strong>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Part Name" span={3}>
-                      {selectedRow.part_name || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="No CMW" span={3}>
-                      {selectedRow.no_cmw || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="DWG Supplier" span={3}>
-                      {selectedRow.dwg || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Maker" span={3}>
-                      {selectedRow.maker || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Supplier" span={3}>
-                      {selectedRow.supplier || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Material" span={3}>
-                      {selectedRow.material || "-"}
-                    </Descriptions.Item>
-                  </Descriptions>
-                )}
-              </Modal>
-            </Flex>
-          </div>
+          <Table
+            // rowSelection={rowSelection}
+            columns={columns}
+            dataSource={filteredData}
+            pagination={{
+              position: ["bottomRight"],
+              responsive: true,
+            }}
+            size="large"
+            bordered={true}
+            onRow={(record) => ({
+              onClick: (e) => handleRowClick(record),
+              style: { cursor: "pointer" },
+            })}
+            loading={loading}
+            scroll={{ x: "max-content" }}
+          />
         </Flex>
+        <Modal
+          title="Detail Part Anak"
+          open={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          width={600}
+          footer={[
+            <Button key="close" onClick={() => setIsModalVisible(false)}>
+              Close
+            </Button>,
+          ]}
+        >
+          {selectedRow && (
+            <Descriptions
+              layout="vertical"
+              bordered
+              column={{ xs: 1, sm: 2, md: 2 }}
+              style={{
+                marginTop: "20px",
+                backgroundColor: "white",
+                padding: "20px",
+                borderRadius: "8px",
+              }}
+            >
+              <Descriptions.Item label="No Part Anak" span={3}>
+                <strong>{selectedRow.nomor_pa || "-"}</strong>
+              </Descriptions.Item>
+              <Descriptions.Item label="No Part Anak Update" span={3}>
+                <strong>{selectedRow.nomor_pa_update || "-"}</strong>
+              </Descriptions.Item>
+              <Descriptions.Item label="Part Name" span={3}>
+                {selectedRow.part_name || "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label="No CMW" span={3}>
+                {selectedRow.no_cmw || "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label="DWG Supplier" span={3}>
+                {selectedRow.dwg || "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label="Maker" span={3}>
+                {selectedRow.maker || "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label="Supplier" span={3}>
+                {selectedRow.supplier || "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label="Material" span={3}>
+                {selectedRow.material || "-"}
+              </Descriptions.Item>
+            </Descriptions>
+          )}
+        </Modal>
       </div>
     </div>
   );

@@ -560,8 +560,8 @@ const PartAnak = () => {
   };
 
   return (
-    <div className="max-w-screen-xl">
-      <div className="grid gap-4">
+    <div className="max-w-screen-xl mx-auto p-4">
+      <div className="space-y-4">
         <Drawer
           // title="Buat Anggaran"
           width={720}
@@ -1210,23 +1210,27 @@ const PartAnak = () => {
             suffix={suffix}
           />
         </div>
-        <Flex gap="middle" vertical>
-          <Table
-            //   rowSelection={rowSelection}
-            columns={columns}
-            dataSource={filteredData}
-            pagination={{
-              position: ["bottomRight"],
-              responsive: true,
-            }}
-            size="large"
-            bordered={true}
-            onRow={(record) => ({
-              onClick: () => handleRowClick(record),
-              style: { cursor: "pointer" },
-            })}
-            loading={loading}
-          />
+
+        <div className="w-full mx-auto">
+          <Flex gap="middle" vertical>
+            <Table
+              //   rowSelection={rowSelection}
+              columns={columns}
+              dataSource={filteredData}
+              pagination={{
+                position: ["bottomRight"],
+                responsive: true,
+              }}
+              size="large"
+              bordered={true}
+              onRow={(record) => ({
+                onClick: () => handleRowClick(record),
+                style: { cursor: "pointer" },
+              })}
+              loading={loading}
+              scroll={{ x: "max-content" }}
+            />
+          </Flex>
 
           <Modal
             title="Detail Part Anak"
@@ -1281,7 +1285,7 @@ const PartAnak = () => {
               </Descriptions>
             )}
           </Modal>
-        </Flex>
+        </div>
       </div>
     </div>
   );
