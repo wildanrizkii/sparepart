@@ -27,7 +27,7 @@ const About = () => {
         </div>
         <div className="grid gap-1 justify-center text-center">
           <div>Version :</div>
-          <div>v1.0.1 | 20-02-2025</div>
+          <div>v1.0.2 | 20-02-2025</div>
         </div>
       </div>
     </div>

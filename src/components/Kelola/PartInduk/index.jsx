@@ -836,6 +836,7 @@ const PartInduk = () => {
                       //   style: { cursor: "pointer" },
                       // })}
                       // loading={loading}
+                      scroll={{ x: "max-content" }}
                     />
                   </Flex>
                 </Form.Item>
@@ -991,6 +992,7 @@ const PartInduk = () => {
                       //   style: { cursor: "pointer" },
                       // })}
                       // loading={loading}
+                      scroll={{ x: "max-content" }}
                     />
                   </Flex>
                 </Form.Item>
