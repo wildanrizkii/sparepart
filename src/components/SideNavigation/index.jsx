@@ -317,7 +317,7 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                                   </div>
 
                                   <div className="flex gap-2 mt-2">
-                                    <Link
+                                    {/* <Link
                                       href="/pengaturan/akun"
                                       className="flex-grow"
                                     >
@@ -327,9 +327,9 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                                           Pengaturan Akun
                                         </h1>
                                       </div>
-                                    </Link>
+                                    </Link> */}
                                     <div
-                                      className="flex shadow-md justify-center items-center p-4 gap-1 text-white bg-red-500 hover:bg-red-600 rounded-md cursor-pointer transition-colors"
+                                      className="flex shadow-md w-44 md:w-52 justify-center items-center p-4 gap-1 text-white bg-red-500 hover:bg-red-600 rounded-md cursor-pointer transition-colors"
                                       onClick={() => signOut()}
                                     >
                                       <LogoutOutlined className="mb-0.5" />
@@ -399,7 +399,7 @@ const SideNavigation = ({ menu, submenu, konten }) => {
                                   fiturAnggaranCount == 0 ? (
                                     <div className="flex rounded-lg bg-transparent mb-2 px-4 py-4 items-center justify-center gap-4 text-black relative">
                                       <div className="grid text-sm gap-2">
-                                        <div className="text-wrap px-12">
+                                        <div className="text-wrap px-8 md:px-10">
                                           Tidak ada notifikasi
                                         </div>
                                       </div>
