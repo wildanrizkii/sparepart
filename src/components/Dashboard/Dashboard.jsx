@@ -617,12 +617,12 @@ const Dashboard = () => {
     <div className="max-w-screen-xl mx-auto">
       <div className="space-y-4">
         {/* Header Section */}
-        <Flex justify="space-between" align="center">
+        <Flex className="flex-col md:flex-row justify-between items-start gap-4">
           <div className="text-2xl font-medium">
             <p>Daftar Part Induk</p>
           </div>
           <div
-            className="flex gap-2 underline cursor-pointer"
+            className="flex gap-2 underline cursor-pointer transition-all"
             onClick={toggleDraftVisibility}
           >
             {isDraftVisible ? <h1>Hide draft</h1> : <h1>Show draft</h1>}
