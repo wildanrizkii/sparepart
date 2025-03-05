@@ -70,7 +70,6 @@ const DetailPartInduk = ({ nomor }) => {
       //   setNoPart(data[0].no_part);
       //   setNoPartUpdate(data[0].no_part_update);
       // }
-      console.log(data);
 
       setPartId(data[0]?.id_pi);
       setNoPart(data[0]?.no_part);
