@@ -48,26 +48,33 @@ const DetailPartInduk = ({ nomor }) => {
 
   const router = useRouter();
 
+  function replacePercent(nomor) {
+    return nomor.replace(/%20/g, " ");
+  }
+
+  console.log(replacePercent(nomor));
+
   const fetchPartInduk = async () => {
     try {
       const { data, error } = await supabase
         .from("part_induk")
         .select("*")
-        .eq("no_part", nomor);
+        .eq("no_part", replacePercent(nomor));
 
       const dataLength = data.length;
 
-      // if (false) {
+      // if (dataLength === 0) {
       //   router.push("/");
       // } else {
       //   setPartId(data[0].id_pi);
       //   setNoPart(data[0].no_part);
       //   setNoPartUpdate(data[0].no_part_update);
       // }
+      console.log(data);
 
-      setPartId(data[0].id_pi);
-      setNoPart(data[0].no_part);
-      setNoPartUpdate(data[0].no_part_update);
+      setPartId(data[0]?.id_pi);
+      setNoPart(data[0]?.no_part);
+      setNoPartUpdate(data[0]?.no_part_update);
     } catch (error) {
       console.error("Error fetching data: ", error);
     } finally {
