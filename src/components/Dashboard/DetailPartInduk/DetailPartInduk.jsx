@@ -57,13 +57,17 @@ const DetailPartInduk = ({ nomor }) => {
 
       const dataLength = data.length;
 
-      if (dataLength === 0) {
-        router.push("/");
-      } else {
-        setPartId(data[0].id_pi);
-        setNoPart(data[0].no_part);
-        setNoPartUpdate(data[0].no_part_update);
-      }
+      // if (false) {
+      //   router.push("/");
+      // } else {
+      //   setPartId(data[0].id_pi);
+      //   setNoPart(data[0].no_part);
+      //   setNoPartUpdate(data[0].no_part_update);
+      // }
+
+      setPartId(data[0].id_pi);
+      setNoPart(data[0].no_part);
+      setNoPartUpdate(data[0].no_part_update);
     } catch (error) {
       console.error("Error fetching data: ", error);
     } finally {
