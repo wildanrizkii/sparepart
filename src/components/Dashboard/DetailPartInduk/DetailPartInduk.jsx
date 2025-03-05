@@ -52,8 +52,6 @@ const DetailPartInduk = ({ nomor }) => {
     return nomor.replace(/%20/g, " ");
   }
 
-  console.log(replacePercent(nomor));
-
   const fetchPartInduk = async () => {
     try {
       const { data, error } = await supabase
